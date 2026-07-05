@@ -1,6 +1,10 @@
 <h1 align="center"> 🖨️ FacturImprenta - Sistema de Gestión y Cotización de Imprenta ⚙️ </h1>
 
 <p align="center">
+  <img width="600" height="590" alt="amigo secreto" src="frontend/public/logo.png" />
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/STATUS-Active-brightgreen?style=for-the-badge"> &nbsp;
   <img src="https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white" alt="Angular"> &nbsp; 
   <img src="https://img.shields.io/badge/Java_21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java 21"> &nbsp; 
@@ -13,9 +17,9 @@
 
 ## 📝 Descripción del Proyecto
 
-**FacturImprenta** es un sistema de gestión empresarial (ERP) y facturación simplificada diseñado a medida para imprentas. Permite administrar de extremo a extremo el flujo comercial y productivo del negocio: desde el registro de clientes y la cotización dinámica de servicios (según materiales y acabados), hasta el seguimiento en tiempo real del estado de producción y los pagos.
+FacturImprenta es un sistema de gestión empresarial y cotizador simplificado diseñado para imprentas. Permite administrar el flujo comercial y productivo del negocio: desde el registro de clientes y la cotización dinámica de servicios (según materiales y acabados), hasta el seguimiento en tiempo real del estado de producción y los pagos.
 
-El sistema sigue una arquitectura moderna desacoplada:
+El sistema sigue una arquitectura desacoplada:
 *   **Frontend (Angular 21):** Interfaz SPA intuitiva y reactiva inspirada en texturas de papel y marcas de corte para operarios y gerentes.
 *   **Backend (Java 21 / Spring Boot):** API REST robusta que maneja las reglas de negocio, persistencia relacional en PostgreSQL y la seguridad mediante tokens criptográficos JWT.
 
@@ -61,7 +65,7 @@ El acceso al portal web está condicionado por roles (`admin` y `user`) controla
 
 ## 🏗️ Arquitectura y Capas del Backend
 
-El backend se ha estructurado bajo un diseño de **arquitectura por capas** (Layered Architecture), lo que promueve una clara separación de responsabilidades y un bajo acoplamiento:
+El backend se ha estructurado bajo un diseño de arquitectura por capas (Layered Architecture), lo que promueve una clara separación de responsabilidades y un bajo acoplamiento:
 
 | Capa / Paquete | Responsabilidad Principal | Clases / Conceptos Clave |
 | :--- | :--- | :--- |
