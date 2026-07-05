@@ -1,0 +1,119 @@
+<div class="min-h-screen bg-[var(--color-paper)] animate-fade-in-up">
+  <main class="mx-auto max-w-3xl px-6 py-6">
+
+    @if (cargando()) {
+    <p class="text-sm text-neutral-500 font-ticket animate-pulse">Cargando pedido...</p>
+    } @else if (pedido(); as p) {
+
+    <!-- Cabecera del Pedido Especial (Estilo Hoja de Producción) -->
+    <div class="crop-marks relative mb-6 rounded-sm border border-[var(--color-border-warm)] bg-white p-5 shadow-sm">
+      <div class="mb-4 flex items-center justify-between border-b border-[var(--color-border-warm)] pb-3">
+        <div class="flex flex-col font-ticket">
+          <p class="text-xs uppercase tracking-widest text-neutral-400">Orden de Trabajo</p>
+          <h2 class="text-2xl font-bold text-[var(--color-ink)]">
+            N° {{ p.idPedido.toString().padStart(6, '0') }}
+          </h2>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <span class="px-2.5 py-1 font-ticket text-xs uppercase tracking-wider font-bold rounded-sm"
+            [class]="p.estado | estadoPedidoClase">
+            {{ p.estado }}
+          </span>
+          @if (siguienteEstado(); as siguiente) {
+          <button hlmBtn (click)="avanzarEstado()" [disabled]="cambiandoEstado()"
+            class="font-ticket uppercase tracking-wider text-[10px] py-1 px-3 cursor-pointer">
+            {{ cambiandoEstado() ? 'Procesando...' : 'Avanzar a ' + siguiente }}
+          </button>
+          } @else {
+          <span
+            class="font-ticket text-xs text-green-700 bg-green-50 border border-green-200 px-2 py-1 uppercase font-semibold">Completado</span>
+          }
+        </div>
+      </div>
+
+      <p class="mb-3 text-xs uppercase tracking-wider font-bold text-neutral-500">Detalle de Ítems</p>
+
+      <div class="flex flex-col">
+        @for (item of p.items; track $index) {
+        <div class="divisor-ticket flex justify-between py-3 text-sm text-neutral-600 first:border-t-0 first:pt-0">
+          <div class="flex flex-col">
+            <span class="font-semibold text-neutral-700">{{ item.material }}</span>
+            <span class="text-xs text-neutral-400 font-mono">{{ item.acabado }} · {{ item.ancho }}x{{ item.alto
+              }}cm</span>
+          </div>
+          <span class="font-ticket font-medium text-neutral-700">S/ {{ item.total.toFixed(2) }}</span>
+        </div>
+        }
+      </div>
+
+      <div class="divisor-ticket mt-2 pt-4 flex justify-between text-base font-bold text-[var(--color-ink)]">
+        <span class="uppercase">Valor Total de la Orden</span>
+        <span class="font-ticket text-lg">S/ {{ p.total.toFixed(2) }}</span>
+      </div>
+    </div>
+
+    <!-- Sección de Estado de Cuentas / Transacciones (Estilo Recibo de Cobranza) -->
+    <div class="crop-marks relative rounded-sm border border-[var(--color-border-warm)] bg-white p-5 shadow-sm">
+      <div class="mb-4 flex justify-between items-center border-b border-[var(--color-border-warm)] pb-3">
+        <span class="text-xs uppercase tracking-wider font-bold text-neutral-500">Control de Caja</span>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-neutral-500">Saldo pendiente:</span>
+          <span class="font-ticket text-base font-bold text-[var(--color-accent)]">S/ {{ saldoPendiente().toFixed(2)
+            }}</span>
+        </div>
+      </div>
+
+      <!-- Registro de nuevo pago -->
+      <form [formGroup]="formPago" (ngSubmit)="registrarPago()" class="flex flex-col md:flex-row gap-3 mb-5">
+        <div class="flex-1 flex gap-2">
+          <input id="monto" type="number" formControlName="monto" placeholder="Monto S/" step="0.01" hlmInput
+            class="w-32 font-ticket" />
+          <hlm-select formControlName="metodo" class="w-36">
+            <hlm-select-trigger class="w-60 border flex cursor-pointer">
+              <hlm-select-value placeholder="Seleccione un método" />
+            </hlm-select-trigger>
+            <hlm-select-content *hlmSelectPortal>
+              <hlm-select-group>
+                <hlm-select-label>Métodos de Pago</hlm-select-label>
+                <hlm-select-item value="efectivo">Efectivo</hlm-select-item>
+                <hlm-select-item value="yape">Yape</hlm-select-item>
+                <hlm-select-item value="transferencia">Transferencia</hlm-select-item>
+              </hlm-select-group>
+            </hlm-select-content>
+          </hlm-select>
+        </div>
+
+        <button hlmBtn type="submit" [disabled]="formPago.invalid || registrandoPago()"
+          class="font-ticket uppercase tracking-wider text-xs md:w-44 cursor-pointer">
+          {{ registrandoPago() ? 'Registrando...' : 'Registrar pago' }}
+        </button>
+      </form>
+
+      @if (errorPago()) {
+      <p
+        class="mb-4 text-xs text-[var(--color-accent)] font-semibold bg-[var(--color-accent)]/5 border border-[var(--color-accent)]/20 p-2">
+        {{ errorPago() }}</p>
+      }
+
+      <!-- Historial de cobros -->
+      @if (pagos().length > 0) {
+      <div class="divisor-ticket pt-3">
+        <p class="mb-2 text-xs uppercase tracking-wider font-bold text-neutral-400">Historial de Transacciones</p>
+        <div class="flex flex-col gap-1.5">
+          @for (pago of pagos(); track pago.id) {
+          <div
+            class="flex justify-between py-1.5 px-2 text-xs text-neutral-600 bg-neutral-50/50 border border-neutral-100">
+            <span class="font-medium uppercase">{{ pago.metodo }} · <span
+                class="font-ticket text-[10px] text-neutral-400">{{ pago.fecha | date:'d MMM y, HH:mm' }}</span></span>
+            <span class="font-ticket font-bold text-neutral-700">S/ {{ pago.monto.toFixed(2) }}</span>
+          </div>
+          }
+        </div>
+      </div>
+      }
+    </div>
+
+    }
+  </main>
+</div>

@@ -1,0 +1,79 @@
+<div class="min-h-screen bg-[var(--color-paper)] animate-fade-in-up">
+  <main class="mx-auto max-w-4xl px-6 py-6">
+    
+    <!-- Header -->
+    <div class="mb-6 flex justify-between items-center border border-[var(--color-border-warm)] bg-white px-6 py-4 shadow-sm crop-marks relative">
+      <div class="flex flex-col">
+        <p class="font-ticket text-xs uppercase tracking-widest text-[var(--color-cyan)] font-semibold">Base de Datos Comercial</p>
+        <h1 class="text-2xl font-bold text-[var(--color-ink)] uppercase tracking-tight">Directorio de Clientes</h1>
+      </div>
+      <span class="font-ticket text-xs text-neutral-500 border border-neutral-200 px-2 py-0.5 uppercase bg-neutral-50">Acceso General</span>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      
+      <!-- Form Container -->
+      <div class="crop-marks relative rounded-sm border border-[var(--color-border-warm)] bg-white p-5 shadow-sm h-fit md:col-span-1">
+        <h2 class="mb-4 text-lg font-bold text-[var(--color-ink)] uppercase tracking-tight">Registrar Cliente</h2>
+
+        <form [formGroup]="form" (ngSubmit)="crearCliente()" class="flex flex-col gap-3">
+          <div class="flex flex-col gap-1">
+            <label hlmLabel for="nombre">Nombre / Razón Social</label>
+            <input hlmInput id="nombre" formControlName="nombre" placeholder="ej. Inversiones SAC" />
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label hlmLabel for="rucDni">RUC o DNI</label>
+            <input hlmInput id="rucDni" formControlName="rucDni" placeholder="ej. 20123456789" class="font-ticket" />
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label hlmLabel for="telefono">Teléfono / Celular</label>
+            <input hlmInput id="telefono" formControlName="telefono" placeholder="ej. 987654321" class="font-ticket" />
+          </div>
+
+          <button hlmBtn type="submit" [disabled]="form.invalid || guardando()" class="w-full font-ticket uppercase tracking-wider text-xs mt-2 cursor-pointer">
+            {{ guardando() ? 'Guardando...' : '+ Registrar Cliente' }}
+          </button>
+        </form>
+      </div>
+
+      <!-- Clients List -->
+      <div class="crop-marks relative rounded-sm border border-[var(--color-border-warm)] bg-white p-5 shadow-sm md:col-span-2">
+        <h2 class="mb-4 text-lg font-bold text-[var(--color-ink)] uppercase tracking-tight">Clientes Registrados</h2>
+
+        <div hlmTableContainer class="overflow-hidden border border-[var(--color-border-warm)] bg-white">
+          <table hlmTable class="w-full text-sm">
+            <thead hlmTHead>
+              <tr hlmTr class="border-b border-[var(--color-border-warm)] hover:bg-transparent">
+                <th hlmTh class="px-4 py-3 font-semibold text-neutral-500 w-1/3">Nombre</th>
+                <th hlmTh class="px-4 py-3 font-semibold text-neutral-500 w-1/3">RUC/DNI</th>
+                <th hlmTh class="px-4 py-3 font-semibold text-neutral-500 w-1/6">Teléfono</th>
+                <th hlmTh class="px-4 py-3 font-semibold text-neutral-500 w-1/6 text-right">Acción</th>
+              </tr>
+            </thead>
+            <tbody hlmTBody>
+              @for (c of clientes(); track c.id) {
+                <tr hlmTr class="divisor-ticket hover:bg-neutral-50/50 transition-colors">
+                  <td hlmTd class="px-4 py-3 font-medium text-neutral-700">{{ c.nombre }}</td>
+                  <td hlmTd class="px-4 py-3 text-neutral-600 font-mono text-xs">{{ c.rucDni || 'Sin Documento' }}</td>
+                  <td hlmTd class="px-4 py-3 text-neutral-600 font-mono text-xs">{{ c.telefono || 'Sin Teléfono' }}</td>
+                  <td hlmTd class="px-4 py-3 text-right">
+                    <button (click)="eliminarCliente(c.id)" class="text-xs text-[var(--color-accent)] font-semibold hover:underline cursor-pointer">
+                      Eliminar
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="4" class="p-6 text-center text-sm text-neutral-500 font-medium">No hay clientes registrados.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>

@@ -1,0 +1,157 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/preflight.css' layer(base);
+@import 'tailwindcss/utilities.css';
+@import '@spartan-ng/brain/hlm-tailwind-preset.css';
+
+@layer theme, base, components, utilities;
+
+:root {
+  --color-paper: #fafaf7;
+  --color-ink: #17171a;
+  --color-border-warm: #e4e1d8;
+  --color-accent: #e63971;
+  --color-cyan: #0ea5c4;
+  --color-amber: #d4a017;
+
+  color-scheme: light;
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  /* Diseño de imprenta: bordes rectos (0px) para semejar papel cortado */
+  --radius: 0px; 
+  --background: var(--color-paper);
+  --foreground: var(--color-ink);
+  --card: #ffffff;
+  --card-foreground: var(--color-ink);
+  --popover: #ffffff;
+  --popover-foreground: var(--color-ink);
+  --primary: var(--color-ink);
+  --primary-foreground: var(--color-paper);
+  --secondary: var(--color-border-warm);
+  --secondary-foreground: var(--color-ink);
+  --muted: var(--color-border-warm);
+  --muted-foreground: #737373;
+  --accent: var(--color-border-warm);
+  --accent-foreground: var(--color-ink);
+  --destructive: var(--color-accent);
+  --destructive-foreground: #ffffff;
+  --border: var(--color-border-warm);
+  --input: var(--color-border-warm);
+  --ring: var(--color-cyan);
+}
+
+:root.dark {
+  color-scheme: dark;
+  --background: oklch(0.15 0 0);
+  --foreground: oklch(0.99 0.003 80);
+  --card: oklch(0.20 0 0);
+  --card-foreground: oklch(0.99 0.003 80);
+  --popover: oklch(0.20 0 0);
+  --popover-foreground: oklch(0.99 0.003 80);
+  --primary: oklch(0.99 0.003 80);
+  --primary-foreground: oklch(0.15 0 0);
+  --secondary: oklch(0.27 0 0);
+  --secondary-foreground: oklch(0.99 0.003 80);
+  --muted: oklch(0.27 0 0);
+  --muted-foreground: oklch(0.70 0 0);
+  --accent: oklch(0.27 0 0);
+  --accent-foreground: oklch(0.99 0.003 80);
+  --destructive: oklch(0.70 0.19 22);
+  --destructive-foreground: oklch(0.20 0 0);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.55 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+  }
+}
+
+.font-ticket {
+  font-family: var(--font-mono);
+}
+
+/* Marca de registro: las cruces que usan las imprentas para alinear
+planchas de color. Se usa en las esquinas de tarjetas clave. */
+.crop-marks {
+  position: relative;
+}
+.crop-marks::before,
+.crop-marks::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid var(--color-ink);
+  opacity: 0.35;
+}
+.crop-marks::before {
+  top: -1px;
+  left: -1px;
+  border-right: none;
+  border-bottom: none;
+}
+.crop-marks::after {
+  bottom: -1px;
+  right: -1px;
+  border-left: none;
+  border-top: none;
+}
+
+/* Divisor "perforado" — como el filo de un comprobante que se separa */
+.divisor-ticket {
+  border-top: 1.5px dashed var(--color-border-warm);
+}
+
+/* Barra de calibración de color (firma visual de imprenta) */
+.cmyk-strip {
+  display: flex;
+  gap: 3px;
+}
+.cmyk-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+.cmyk-dot.cyan { background-color: var(--color-cyan); }
+.cmyk-dot.magenta { background-color: var(--color-accent); }
+.cmyk-dot.yellow { background-color: var(--color-amber); }
+.cmyk-dot.key { background-color: var(--color-ink); }
+
+/* Animación global de desvanecimiento suave */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+/* Control de opacidad para placeholders para que no parezcan texto ingresado */
+input::placeholder, textarea::placeholder {
+  opacity: 0.45 !important;
+}
+[data-placeholder] *, [data-placeholder] {
+  opacity: 0.55 !important;
+}
+
+/* Efecto de elevación en hover para interacciones */
+.hover-lift {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
+}

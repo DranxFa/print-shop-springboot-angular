@@ -1,0 +1,73 @@
+<div class="min-h-screen bg-[var(--color-paper)] animate-fade-in-up">
+  <main class="mx-auto max-w-5xl px-6 py-6">
+
+    <!-- Indicadores de estado de imprenta -->
+    <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="crop-marks relative rounded-sm border border-[var(--color-border-warm)] bg-white p-4">
+        <p class="text-xs text-neutral-500 font-medium">Pedidos totales</p>
+        <p class="font-ticket text-2xl font-semibold text-[var(--color-ink)]">{{ totalPedidos() }}</p>
+      </div>
+      <div class="crop-marks relative rounded-sm border border-[var(--color-border-warm)] bg-white p-4">
+        <p class="text-xs text-neutral-500 font-medium">En producción</p>
+        <p class="font-ticket text-2xl font-semibold text-[var(--color-cyan)]">{{ enProduccion() }}</p>
+      </div>
+      <div class="crop-marks relative rounded-sm border border-[var(--color-border-warm)] bg-white p-4">
+        <p class="text-xs text-neutral-500 font-medium">Ingresos totales</p>
+        <p class="font-ticket text-2xl font-semibold text-[var(--color-ink)]">S/ {{ ingresosTotal().toFixed(2) }}</p>
+      </div>
+    </div>
+
+    <p class="mb-2 text-sm font-semibold text-neutral-700 tracking-tight">Pedidos recientes</p>
+
+    <!-- Tabla con Spartan UI -->
+    <div hlmTableContainer class="overflow-hidden rounded-sm border border-[var(--color-border-warm)] bg-white">
+      @if (cargando() && pedidos().length === 0) {
+      <p class="p-6 text-center text-sm text-neutral-500 font-medium animate-pulse">Cargando pedidos...</p>
+      } @else if (pedidos().length === 0) {
+      <p class="p-6 text-center text-sm text-neutral-500 font-medium">Todavía no hay pedidos registrados.</p>
+      } @else {
+      <table hlmTable class="w-full text-sm">
+        <thead hlmTHead>
+          <tr hlmTr class="border-b border-[var(--color-border-warm)] hover:bg-transparent">
+            <th hlmTh class="px-4 py-3 font-semibold text-neutral-500 w-1/4">N° Pedido</th>
+            <th hlmTh class="px-4 py-3 font-semibold text-neutral-500 w-1/2">Ítems</th>
+            <th hlmTh class="px-4 py-3 font-semibold text-neutral-500 w-1/4">Estado</th>
+            <th hlmTh class="px-4 py-3 font-semibold text-neutral-500 w-1/4 text-right">Total</th>
+          </tr>
+        </thead>
+        <tbody hlmTBody>
+          @for (pedido of pedidos(); track pedido.idPedido) {
+          <tr hlmTr class="divisor-ticket  hover:bg-[var(--color-paper)] transition-colors">
+            <td hlmTd class="px-4 py-3 font-ticket text-neutral-700 font-medium">
+              N° {{ pedido.idPedido.toString().padStart(6, '0') }}
+            </td>
+            <td hlmTd class="px-4 py-3 text-neutral-700">
+              {{ pedido.items[0]?.material || 'Pedido de imprenta' }}
+              @if (pedido.items.length > 1) {
+              <span class="text-xs text-neutral-400 font-mono"> (+{{ pedido.items.length - 1 }} ítems)</span>
+              }
+            </td>
+            <td hlmTd class="px-4 py-3">
+              <span class="px-2 py-0.5 font-ticket text-[9px] uppercase tracking-wider font-bold rounded-sm"
+                [class]="pedido.estado | estadoPedidoClase">
+                {{ pedido.estado }}
+              </span>
+            </td>
+            <td hlmTd class="px-4 py-3 font-ticket text-neutral-700 font-medium text-right">
+              S/ {{ pedido.total.toFixed(2) }}
+            </td>
+            <td hlmTd>
+              <button hlmBtn (click)="router.navigate(['/pedidos', pedido.idPedido])"
+                class="bg-[#18191b] border-neutral-800 px-2 py-1 rounded-xs text-xs text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors cursor-pointer">
+                Ver detalle
+              </button>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+      }
+    </div>
+
+  </main>
+</div>

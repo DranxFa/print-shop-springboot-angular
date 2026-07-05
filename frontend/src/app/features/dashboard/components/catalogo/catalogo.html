@@ -1,0 +1,94 @@
+<div class="min-h-screen bg-[var(--color-paper)] animate-fade-in-up">
+  <main class="mx-auto max-w-4xl px-6 py-6">
+    <!-- Rótulo de Advertencia de Rol -->
+    <div class="mb-6 flex justify-between items-center border border-[var(--color-border-warm)] bg-white px-5 py-3 shadow-sm crop-marks relative">
+      <div class="flex flex-col">
+        <p class="font-ticket text-[9px] uppercase tracking-widest text-[var(--color-accent)] font-semibold">Acceso Restringido</p>
+        <h1 class="text-base font-bold text-[var(--color-ink)] uppercase tracking-tight">Catálogo de Imprenta</h1>
+      </div>
+      <span class="font-ticket text-[10px] text-neutral-400 border border-neutral-200 px-2 py-0.5 uppercase bg-neutral-50">Solo Administradores</span>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <!-- MATERIALES -->
+      <div class="crop-marks relative rounded-sm border border-[var(--color-border-warm)] bg-white p-5 shadow-sm">
+        <h2 class="mb-4 text-sm font-bold text-[var(--color-ink)] uppercase tracking-tight">Materiales</h2>
+
+        <form [formGroup]="formMaterial" (ngSubmit)="crearMaterial()" class="mb-6 flex flex-col gap-3">
+          <div class="flex flex-col gap-1">
+            <label hlmLabel for="nombreMaterial">Nombre del material</label>
+            <input hlmInput id="nombreMaterial" formControlName="nombre" placeholder="ej. Lona banner" />
+          </div>
+
+          <div class="flex gap-3">
+            <div class="w-1/2 flex flex-col gap-1">
+              <label hlmLabel for="precioM2">Precio por m² (S/)</label>
+              <input hlmInput id="precioM2" type="number" step="0.01" formControlName="precioM2" placeholder="0.00" class="font-ticket" />
+            </div>
+            <div class="w-1/2 flex flex-col gap-1">
+              <label hlmLabel for="unidad">Unidad de medida</label>
+              <input hlmInput id="unidad" formControlName="unidad" placeholder="m2" />
+            </div>
+          </div>
+
+          <button hlmBtn type="submit" [disabled]="formMaterial.invalid || guardandoMaterial()" class="w-full font-ticket uppercase tracking-wider text-xs mt-1 cursor-pointer">
+            {{ guardandoMaterial() ? 'Guardando...' : '+ Agregar material' }}
+          </button>
+        </form>
+
+        <div class="flex flex-col">
+          @for (m of materiales(); track m.id) {
+            <div class="divisor-ticket flex items-center justify-between py-3 text-sm first:border-t-0 first:pt-0">
+              <span class="text-neutral-700 font-medium">
+                {{ m.nombre }} — 
+                <span class="font-ticket text-xs bg-neutral-50 px-1.5 py-0.5 border border-neutral-200 text-neutral-600">S/ {{ m.precioM2.toFixed(2) }}/{{ m.unidad }}</span>
+              </span>
+              <button (click)="eliminarMaterial(m.id)" class="text-xs text-[var(--color-accent)] font-semibold hover:underline cursor-pointer">Eliminar</button>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- ACABADOS -->
+      <div class="crop-marks relative rounded-sm border border-[var(--color-border-warm)] bg-white p-5 shadow-sm">
+        <h2 class="mb-4 text-sm font-bold text-[var(--color-ink)] uppercase tracking-tight">Acabados</h2>
+
+        <form [formGroup]="formAcabado" (ngSubmit)="crearAcabado()" class="mb-6 flex flex-col gap-3">
+          <div class="flex flex-col gap-1">
+            <label hlmLabel for="nombreAcabado">Nombre del acabado</label>
+            <input hlmInput id="nombreAcabado" formControlName="nombre" placeholder="ej. Ojales" />
+          </div>
+
+          <div class="flex gap-3">
+            <div class="w-1/2 flex flex-col gap-1">
+              <label hlmLabel for="costoFijo">Costo fijo (S/)</label>
+              <input hlmInput id="costoFijo" type="number" step="0.01" formControlName="costoFijo" placeholder="0.00" class="font-ticket" />
+            </div>
+            <div class="w-1/2 flex flex-col gap-1">
+              <label hlmLabel for="costoM2">Costo por m² (S/)</label>
+              <input hlmInput id="costoM2" type="number" step="0.01" formControlName="costoM2" placeholder="0.00" class="font-ticket" />
+            </div>
+          </div>
+
+          <button hlmBtn type="submit" [disabled]="formAcabado.invalid || guardandoAcabado()" class="w-full font-ticket uppercase tracking-wider text-xs mt-1 cursor-pointer">
+            {{ guardandoAcabado() ? 'Guardando...' : '+ Agregar acabado' }}
+          </button>
+        </form>
+
+        <div class="flex flex-col">
+          @for (a of acabados(); track a.id) {
+            <div class="divisor-ticket flex items-center justify-between py-3 text-sm first:border-t-0 first:pt-0">
+              <span class="text-neutral-700 font-medium">
+                {{ a.nombre }} — 
+                <span class="font-ticket text-xs bg-neutral-50 px-1.5 py-0.5 border border-neutral-200 text-neutral-600">S/ {{ a.costoFijo.toFixed(2) }} + S/ {{ a.costoM2.toFixed(2) }}/m²</span>
+              </span>
+              <button (click)="eliminarAcabado(a.id)" class="text-xs text-[var(--color-accent)] font-semibold hover:underline cursor-pointer">Eliminar</button>
+            </div>
+          }
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>

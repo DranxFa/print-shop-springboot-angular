@@ -1,0 +1,102 @@
+<div class="flex h-screen bg-[var(--color-paper)] text-[var(--color-ink)]">
+  
+  <!-- Sidebar -->
+  <aside class="w-64 bg-[#18191b] border-r border-neutral-800 flex flex-col justify-between shadow-sm shrink-0">
+    <div>
+      <!-- Brand Logo / Header -->
+      <div class="p-6 border-b border-neutral-800 flex items-center gap-3">
+        <span class="border border-white px-1.5 py-0.5 text-xs font-ticket font-bold bg-white text-black select-none">FI</span>
+        <div class="flex flex-col">
+          <span class="font-bold text-sm tracking-tight uppercase text-white">FacturImprenta</span>
+          <span class="text-[9px] font-ticket uppercase tracking-widest text-neutral-500">Control Panel</span>
+        </div>
+      </div>
+
+      <!-- Navigation Menu -->
+      <nav class="p-4 flex flex-col gap-1">
+        <!-- Dashboard Link -->
+        <a
+          routerLink="/dashboard"
+          routerLinkActive="bg-neutral-800 text-white font-semibold border border-neutral-700"
+          [routerLinkActiveOptions]="{exact: true}"
+          class="flex items-center gap-3 px-4 py-3 rounded-sm text-sm text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors cursor-pointer"
+        >
+          <ng-icon name="lucideLayoutDashboard" class="text-base"></ng-icon>
+          <span>Pedidos</span>
+        </a>
+
+        <!-- Cotizador Link -->
+        <a
+          routerLink="/cotizador"
+          routerLinkActive="bg-neutral-800 text-white font-semibold border border-neutral-700"
+          class="flex items-center gap-3 px-4 py-3 rounded-sm text-sm text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors cursor-pointer"
+        >
+          <ng-icon name="lucideCalculator" class="text-base"></ng-icon>
+          <span>Nueva Cotización</span>
+        </a>
+
+        <!-- Clientes Link -->
+        <a
+          routerLink="/clientes"
+          routerLinkActive="bg-neutral-800 text-white font-semibold border border-neutral-700"
+          class="flex items-center gap-3 px-4 py-3 rounded-sm text-sm text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors cursor-pointer"
+        >
+          <ng-icon name="lucideUsers" class="text-base"></ng-icon>
+          <span>Gestionar Clientes</span>
+        </a>
+
+        <!-- Admin Catalog Link -->
+        @if (authService.esAdmin()) {
+          <a
+            routerLink="/admin/catalogo"
+            routerLinkActive="bg-neutral-800 text-white font-semibold border border-neutral-700"
+            class="flex items-center gap-3 px-4 py-3 rounded-sm text-sm text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors cursor-pointer"
+          >
+            <ng-icon name="lucideBookOpen" class="text-base"></ng-icon>
+            <span>Gestionar Catálogo</span>
+          </a>
+
+          <!-- Admin Users Link -->
+          <a
+            routerLink="/admin/usuarios"
+            routerLinkActive="bg-neutral-800 text-white font-semibold border border-neutral-700"
+            class="flex items-center gap-3 px-4 py-3 rounded-sm text-sm text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors cursor-pointer"
+          >
+            <ng-icon name="lucideUserCheck" class="text-base"></ng-icon>
+            <span>Gestionar Usuarios</span>
+          </a>
+        }
+      </nav>
+    </div>
+
+    <!-- User Profile & Log Out Footer -->
+    <div class="p-4 border-t border-neutral-800 flex flex-col gap-3">
+      <div class="flex items-center gap-3 px-2">
+        <div class="flex items-center justify-center size-8 rounded-full bg-neutral-800 text-neutral-300 shrink-0">
+          <ng-icon name="lucideUser" class="text-base"></ng-icon>
+        </div>
+        <div class="flex flex-col min-w-0">
+          <span class="text-xs font-semibold text-neutral-200 truncate">{{ authService.usuario()?.nombre }}</span>
+          <span class="text-[9px] uppercase font-ticket tracking-widest text-neutral-500">
+            {{ authService.esAdmin() ? 'Administrador' : 'Operario' }}
+          </span>
+        </div>
+      </div>
+      
+      <button
+        (click)="cerrarSesion()"
+        class="w-full flex items-center justify-center gap-2 border border-neutral-800 bg-[#121316] text-neutral-300 py-2 px-3 hover:bg-neutral-800 hover:text-white transition-colors cursor-pointer text-xs font-ticket uppercase tracking-wider"
+      >
+        <ng-icon name="lucideLogOut"></ng-icon>
+        Salir
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <div class="flex-1 flex flex-col overflow-y-auto">
+    <main class="flex-1">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

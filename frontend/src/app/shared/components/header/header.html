@@ -1,0 +1,36 @@
+<header class="flex flex-col border-b border-[var(--color-border-warm)] bg-white">
+  <!-- CMYK Calibration Bar -->
+  <div class="flex justify-between items-center bg-[var(--color-paper)] px-6 py-1 border-b border-[var(--color-border-warm)]">
+    <span class="font-ticket text-[9px] uppercase tracking-widest text-neutral-400">Prensa & Calibración</span>
+    <div class="cmyk-strip">
+      <div class="cmyk-dot cyan" title="Cyan"></div>
+      <div class="cmyk-dot magenta" title="Magenta"></div>
+      <div class="cmyk-dot yellow" title="Yellow"></div>
+      <div class="cmyk-dot key" title="Key (Black)"></div>
+    </div>
+  </div>
+
+  <!-- Main header navigation/info -->
+  <div class="flex items-center justify-between px-6 py-4">
+    <div (click)="irAlDashboard()" class="flex items-center gap-2 text-base font-semibold text-[var(--color-ink)] cursor-pointer select-none">
+      <span class="border border-[var(--color-ink)] px-1.5 py-0.5 text-xs font-ticket font-bold bg-[var(--color-ink)] text-white">FI</span>
+      <span class="tracking-tight uppercase">FacturImprenta</span>
+    </div>
+    @if (authService.usuario(); as user) {
+      <div class="flex items-center gap-3 text-sm text-neutral-600">
+        <span>
+          {{ user.nombre }} · 
+          <span class="font-ticket text-xs uppercase text-[var(--color-cyan)] border border-[var(--color-cyan)]/20 px-1 py-0.5 bg-[var(--color-cyan)]/5">
+            {{ user.rol }}
+          </span>
+        </span>
+        <button
+          (click)="cerrarSesion()"
+          class="rounded-sm border border-[var(--color-border-warm)] px-3 py-1.5 text-xs hover:bg-neutral-50 font-medium transition-colors cursor-pointer"
+        >
+          Cerrar sesión
+        </button>
+      </div>
+    }
+  </div>
+</header>

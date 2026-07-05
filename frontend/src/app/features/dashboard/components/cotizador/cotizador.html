@@ -1,0 +1,147 @@
+<div class="min-h-screen bg-[var(--color-paper)] animate-fade-in-up">
+  <main class="mx-auto max-w-3xl px-6 py-6">
+
+    <!-- Formulario de Cotización -->
+    <form [formGroup]="form"
+      class="crop-marks relative mb-6 rounded-sm border border-[var(--color-border-warm)] bg-white p-5 shadow-sm">
+      <div class="mb-4 pb-2 border-b border-[var(--color-border-warm)]">
+        <p class="font-ticket text-xs uppercase tracking-widest text-[var(--color-cyan)] font-semibold">Parámetros de
+          Producción</p>
+        <h2 class="text-2xl font-bold text-[var(--color-ink)] uppercase tracking-tight">Nueva Cotización</h2>
+      </div>
+
+      <div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="flex flex-col gap-1">
+          <label hlmLabel>Material base</label>
+          <hlm-select formControlName="idMaterial">
+            <hlm-select-trigger class=" w-full flex border cursor-pointer">
+              <hlm-select-value placeholder="Seleccione un material" />
+            </hlm-select-trigger>
+            <hlm-select-content *hlmSelectPortal>
+              <hlm-select-group>
+                <hlm-select-label>Materiales</hlm-select-label>
+                @for (m of materiales(); track m.id) {
+                <hlm-select-item [value]="m.id">{{ m.nombre }} (S/ {{ m.precioM2.toFixed(2) }}/{{ m.unidad
+                  }})</hlm-select-item>
+                }
+              </hlm-select-group>
+            </hlm-select-content>
+          </hlm-select>
+        </div>
+        <div class="flex flex-col gap-1">
+          <label hlmLabel>Acabado adicional</label>
+          <hlm-select formControlName="idAcabado">
+            <hlm-select-trigger class="w-full flex border cursor-pointer">
+              <hlm-select-value placeholder="Seleccione un acabado" />
+            </hlm-select-trigger>
+            <hlm-select-content *hlmSelectPortal>
+              <hlm-select-group>
+                <hlm-select-label>Acabados</hlm-select-label>
+                @for (a of acabados(); track a.id) {
+                <hlm-select-item [value]="a.id">{{ a.nombre }}</hlm-select-item>
+                }
+              </hlm-select-group>
+            </hlm-select-content>
+          </hlm-select>
+        </div>
+      </div>
+
+      <div class="mb-5 grid grid-cols-3 gap-3">
+        <div class="flex flex-col gap-1">
+          <label hlmLabel for="ancho">Ancho (cm)</label>
+          <input id="ancho" type="number" hlmInput formControlName="ancho" class="font-ticket" />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label hlmLabel for="alto">Alto (cm)</label>
+          <input id="alto" type="number" hlmInput formControlName="alto" class="font-ticket" />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label hlmLabel for="cantidad">Cantidad</label>
+          <input id="cantidad" type="number" hlmInput formControlName="cantidad" class="font-ticket" />
+        </div>
+      </div>
+
+      <!-- Resumen en Tiempo Real (Estilo Recibo de Caja) -->
+      @if (resultado(); as r) {
+      <div
+        class="mb-5 bg-[var(--color-paper)] p-4 border border-[var(--color-border-warm)] text-sm font-ticket relative">
+        <div class="flex justify-between text-neutral-500 py-0.5"><span>Área calculada</span><span>{{ r.area.toFixed(2)
+            }} m²</span></div>
+        <div class="flex justify-between text-neutral-500 py-0.5"><span>Costo material</span><span>S/ {{
+            r.costoMaterial.toFixed(2) }}</span></div>
+        <div class="flex justify-between text-neutral-500 py-0.5"><span>Costo acabado</span><span>S/ {{
+            r.costoAcabado.toFixed(2) }}</span></div>
+        <div class="flex justify-between text-neutral-500 py-0.5"><span>Margen comercial</span><span>S/ {{
+            r.margen.toFixed(2) }}</span></div>
+        <div class="divisor-ticket mt-2 pt-2 flex justify-between text-base font-bold text-[var(--color-ink)]">
+          <span class="uppercase">Precio unitario total</span><span>S/ {{ r.total.toFixed(2) }}</span>
+        </div>
+      </div>
+      } @else if (calculando()) {
+      <div
+        class="mb-5 bg-[var(--color-paper)] p-4 border border-[var(--color-border-warm)] text-center text-xs text-neutral-400 font-ticket">
+        Calculando cotización...
+      </div>
+      }
+
+      <button hlmBtn type="button" (click)="agregarItem()" [disabled]="!resultado()"
+        class="w-full font-ticket uppercase tracking-wider text-xs cursor-pointer">
+        + Agregar ítem al pedido
+      </button>
+    </form>
+
+    <!-- Lista de Ítems Agregados (Estilo Comprobante Desglosable) -->
+    @if (itemsAgregados().length > 0) {
+    <div class="crop-marks relative mb-6 rounded-sm border border-[var(--color-border-warm)] bg-white p-5 shadow-sm">
+      <p class="font-ticket text-[9px] uppercase tracking-widest text-[var(--color-ink)] mb-3 font-semibold">Resumen de
+        la Orden</p>
+
+      @for (item of itemsAgregados(); track $index) {
+      <div class="divisor-ticket flex items-center justify-between py-3 text-sm first:border-t-0 first:pt-0">
+        <div class="flex flex-col">
+          <span class="text-neutral-700 font-medium">{{ item.nombreMaterial }}</span>
+          <span class="text-xs text-neutral-400 font-mono">{{ item.nombreAcabado }} · {{ item.request.ancho }}x{{
+            item.request.alto }}cm · {{ item.request.cantidad }} ud.</span>
+        </div>
+        <div class="flex items-center gap-4">
+          <span class="font-ticket font-bold text-[var(--color-ink)]">S/ {{ item.total.toFixed(2) }}</span>
+          <button (click)="quitarItem($index)"
+            class="text-xs text-[var(--color-accent)] font-semibold hover:underline cursor-pointer">Quitar</button>
+        </div>
+      </div>
+      }
+
+      <div class="divisor-ticket mt-2 pt-4 flex justify-between text-lg font-bold text-[var(--color-ink)]">
+        <span class="uppercase">Importe Total del Pedido</span>
+        <span class="font-ticket">S/ {{ totalPedido().toFixed(2) }}</span>
+      </div>
+    </div>
+
+    <!-- Asignación de Cliente e Envío de Pedido -->
+    <div class="crop-marks relative rounded-sm border border-[var(--color-border-warm)] bg-white p-5 shadow-sm">
+      <div class="flex flex-col gap-3">
+        <div class="flex flex-col gap-1">
+          <label hlmLabel>Cliente responsable</label>
+          <hlm-select (valueChange)="onClienteChangeSelected($event)" class="w-full">
+            <hlm-select-trigger
+              class="w-full bg-white border border-[var(--color-border-warm)] px-3 py-2 text-sm outline-none rounded-none flex items-center justify-between">
+              <hlm-select-value />
+            </hlm-select-trigger>
+            <hlm-select-content *hlmSelectPortal>
+              @for (c of clientes(); track c.id) {
+              <hlm-select-item [value]="c.id">{{ c.nombre }} (RUC/DNI: {{ c.rucDni || 'S/D' }})</hlm-select-item>
+              }
+            </hlm-select-content>
+          </hlm-select>
+        </div>
+
+        <button hlmBtn (click)="confirmarPedido()" [disabled]="!clienteSeleccionado() || guardandoPedido()"
+          class="w-full font-ticket uppercase tracking-wider text-xs py-3 mt-1 cursor-pointer">
+          {{ guardandoPedido() ? 'Procesando orden...' : 'Confirmar y Guardar Pedido' }}
+        </button>
+      </div>
+    </div>
+    }
+
+  </main>
+</div>
