@@ -11,52 +11,41 @@
       </div>
 
       <div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="flex flex-col gap-1">
-          <label hlmLabel>Material base</label>
-          <hlm-select formControlName="idMaterial">
-            <hlm-select-trigger class=" w-full flex border cursor-pointer">
-              <hlm-select-value placeholder="Seleccione un material" />
-            </hlm-select-trigger>
-            <hlm-select-content *hlmSelectPortal>
-              <hlm-select-group>
-                <hlm-select-label>Materiales</hlm-select-label>
-                @for (m of materiales(); track m.id) {
-                <hlm-select-item [value]="m.id">{{ m.nombre }} (S/ {{ m.costoCm2 }}/cm²)</hlm-select-item>
-                }
-              </hlm-select-group>
-            </hlm-select-content>
-          </hlm-select>
+        <div class="flex flex-col gap-1.5">
+          <label hlmLabel for="idMaterial">Material base</label>
+          <select id="idMaterial" formControlName="idMaterial"
+            class="w-full border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-800 rounded-sm focus:border-neutral-900 outline-none cursor-pointer font-medium shadow-2xs">
+            <option [ngValue]="null" disabled selected>-- Seleccione un material --</option>
+            @for (m of materiales(); track m.id) {
+              <option [value]="m.id">{{ m.nombre }} — S/ {{ formatCostoMat(m) }}/cm²</option>
+            }
+          </select>
         </div>
-        <div class="flex flex-col gap-1">
-          <label hlmLabel>Acabado adicional</label>
-          <hlm-select formControlName="idAcabado">
-            <hlm-select-trigger class="w-full flex border cursor-pointer">
-              <hlm-select-value placeholder="Seleccione un acabado" />
-            </hlm-select-trigger>
-            <hlm-select-content *hlmSelectPortal>
-              <hlm-select-group>
-                <hlm-select-label>Acabados</hlm-select-label>
-                @for (a of acabados(); track a.id) {
-                <hlm-select-item [value]="a.id">{{ a.nombre }}</hlm-select-item>
-                }
-              </hlm-select-group>
-            </hlm-select-content>
-          </hlm-select>
+
+        <div class="flex flex-col gap-1.5">
+          <label hlmLabel for="idAcabado">Acabado adicional</label>
+          <select id="idAcabado" formControlName="idAcabado"
+            class="w-full border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-800 rounded-sm focus:border-neutral-900 outline-none cursor-pointer font-medium shadow-2xs">
+            <option [ngValue]="null" selected>Sin acabado adicional</option>
+            @for (a of acabados(); track a.id) {
+              <option [value]="a.id">{{ a.nombre }} — S/ {{ formatPrecioAcab(a) }} ({{ getUnidadAcab(a) }})</option>
+            }
+          </select>
         </div>
       </div>
 
       <div class="mb-5 grid grid-cols-3 gap-3">
-        <div class="flex flex-col gap-1">
+        <div class="flex flex-col gap-1.5">
           <label hlmLabel for="ancho">Ancho (cm)</label>
-          <input id="ancho" type="number" hlmInput formControlName="ancho" class="font-ticket" />
+          <input id="ancho" type="number" hlmInput formControlName="ancho" class="font-ticket border border-neutral-300 px-3 py-2 text-sm rounded-sm bg-white" />
         </div>
-        <div class="flex flex-col gap-1">
+        <div class="flex flex-col gap-1.5">
           <label hlmLabel for="alto">Alto (cm)</label>
-          <input id="alto" type="number" hlmInput formControlName="alto" class="font-ticket" />
+          <input id="alto" type="number" hlmInput formControlName="alto" class="font-ticket border border-neutral-300 px-3 py-2 text-sm rounded-sm bg-white" />
         </div>
-        <div class="flex flex-col gap-1">
+        <div class="flex flex-col gap-1.5">
           <label hlmLabel for="cantidad">Cantidad</label>
-          <input id="cantidad" type="number" hlmInput formControlName="cantidad" class="font-ticket" />
+          <input id="cantidad" type="number" hlmInput formControlName="cantidad" class="font-ticket border border-neutral-300 px-3 py-2 text-sm rounded-sm bg-white" />
         </div>
       </div>
 
@@ -119,19 +108,15 @@
     <!-- Asignación de Cliente e Envío de Pedido -->
     <div class="crop-marks relative rounded-sm border border-[var(--color-border-warm)] bg-white p-5 shadow-sm">
       <div class="flex flex-col gap-3">
-        <div class="flex flex-col gap-1">
-          <label hlmLabel>Cliente responsable</label>
-          <hlm-select (valueChange)="onClienteChangeSelected($event)" class="w-full">
-            <hlm-select-trigger
-              class="w-full bg-white border border-[var(--color-border-warm)] px-3 py-2 text-sm outline-none rounded-none flex items-center justify-between">
-              <hlm-select-value />
-            </hlm-select-trigger>
-            <hlm-select-content *hlmSelectPortal>
-              @for (c of clientes(); track c.id) {
-              <hlm-select-item [value]="c.id">{{ c.nombre }} (Doc: {{ c.documento || 'S/D' }})</hlm-select-item>
-              }
-            </hlm-select-content>
-          </hlm-select>
+        <div class="flex flex-col gap-1.5">
+          <label hlmLabel for="clienteSelect">Cliente responsable</label>
+          <select id="clienteSelect" (change)="onClienteSelectChange($event)"
+            class="w-full border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-800 rounded-sm focus:border-neutral-900 outline-none cursor-pointer font-medium shadow-2xs">
+            <option value="" disabled selected>-- Seleccione un cliente responsable --</option>
+            @for (c of clientes(); track c.id) {
+              <option [value]="c.id">{{ c.nombre }} (Doc: {{ c.documento || 'S/D' }})</option>
+            }
+          </select>
         </div>
 
         <button hlmBtn (click)="confirmarPedido()" [disabled]="!clienteSeleccionado() || guardandoPedido()"

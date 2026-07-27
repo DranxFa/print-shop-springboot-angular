@@ -13,7 +13,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { HlmButton } from '@spartan-ng/helm/button';
 import { HlmInput } from '@spartan-ng/helm/input';
 import { HlmLabel } from '@spartan-ng/helm/label';
-import { HlmSelectImports } from '@spartan-ng/helm/select';
 
 interface ItemAgregado {
   request: ItemPedidoRequest;
@@ -25,7 +24,7 @@ interface ItemAgregado {
 @Component({
   selector: 'app-cotizador',
   standalone: true,
-  imports: [ReactiveFormsModule, HlmButton, HlmInput, HlmLabel, HlmSelectImports],
+  imports: [ReactiveFormsModule, HlmButton, HlmInput, HlmLabel],
   templateUrl: './cotizador.html',
   styleUrl: './cotizador.css',
 })
@@ -60,14 +59,16 @@ export class Cotizador implements OnInit {
       debounceTime(300),
       distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
       switchMap(valores => {
-        if (!valores.idMaterial || !valores.ancho || !valores.alto || !valores.cantidad) {
+        const idMat = Number(valores.idMaterial);
+        const idAcab = valores.idAcabado ? Number(valores.idAcabado) : null;
+        if (!idMat || !valores.ancho || !valores.alto || !valores.cantidad) {
           this.calculando.set(false);
           return [null];
         }
         this.calculando.set(true);
         return this.cotizacionService.cotizar({
-          idMaterial: valores.idMaterial,
-          idAcabado: valores.idAcabado ?? null,
+          idMaterial: idMat,
+          idAcabado: idAcab,
           ancho: valores.ancho,
           alto: valores.alto,
           cantidad: valores.cantidad
@@ -87,8 +88,24 @@ export class Cotizador implements OnInit {
     this.itemsAgregados().reduce((suma, item) => suma + item.total, 0)
   );
 
-  onClienteChangeSelected(value: number | null) {
-    this.clienteSeleccionado.set(value);
+  onClienteSelectChange(event: Event) {
+    const target = event.target as HTMLSelectElement;
+    const val = target.value ? Number(target.value) : null;
+    this.clienteSeleccionado.set(val);
+  }
+
+  formatCostoMat(m: Material): string {
+    const raw = m.costoCm2 ?? (m as any).precioM2 ?? 0;
+    return Number(raw).toFixed(4);
+  }
+
+  formatPrecioAcab(a: Acabado): string {
+    const raw = a.precioBase ?? (a as any).costoFijo ?? 0;
+    return Number(raw).toFixed(2);
+  }
+
+  getUnidadAcab(a: Acabado): string {
+    return a.unidadMedida || (a as any).unidad || 'Unidad';
   }
  
   ngOnInit() {
@@ -100,15 +117,17 @@ export class Cotizador implements OnInit {
   agregarItem() {
     const valores = this.form.getRawValue();
     const resultado = this.resultado();
-    if (!valores.idMaterial || !resultado) return;
+    const idMat = Number(valores.idMaterial);
+    const idAcab = valores.idAcabado ? Number(valores.idAcabado) : null;
+    if (!idMat || !resultado) return;
  
-    const material = this.materiales().find(m => m.id === valores.idMaterial);
-    const acabado = this.acabados().find(a => a.id === valores.idAcabado);
+    const material = this.materiales().find(m => m.id === idMat);
+    const acabado = this.acabados().find(a => a.id === idAcab);
  
     this.itemsAgregados.update(items => [...items, {
       request: {
-        idMaterial: valores.idMaterial!,
-        idAcabado: valores.idAcabado ?? null,
+        idMaterial: idMat,
+        idAcabado: idAcab,
         ancho: valores.ancho!,
         alto: valores.alto!,
         cantidad: valores.cantidad!
