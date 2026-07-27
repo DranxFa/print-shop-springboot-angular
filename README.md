@@ -1,7 +1,7 @@
 <h1 align="center"> 🖨️ FacturImprenta - Sistema de Gestión y Cotización de Imprenta ⚙️ </h1>
 
 <p align="center">
-  <img width="600" height="590" alt="amigo secreto" src="frontend/public/logo.png" />
+  <img width="600" height="590" alt="logo facturimprenta" src="frontend/public/logo.png" />
 </p>
 
 <p align="center">
@@ -17,11 +17,11 @@
 
 ## 📝 Descripción del Proyecto
 
-FacturImprenta es un sistema de gestión empresarial y cotizador simplificado diseñado para imprentas. Permite administrar el flujo comercial y productivo del negocio: desde el registro de clientes y la cotización dinámica de servicios (según materiales y acabados), hasta el seguimiento en tiempo real del estado de producción y los pagos.
+FacturImprenta es un sistema de gestión empresarial y cotizador simplificado diseñado para imprentas. Permite administrar el flujo comercial y productivo del negocio: desde el registro de clientes y la cotización dinámica de servicios (según materiales y acabados), hasta el seguimiento en tiempo real del estado de producción, gestión de usuarios y registro de pagos.
 
-El sistema sigue una arquitectura desacoplada:
-*   **Frontend (Angular 21):** Interfaz SPA intuitiva y reactiva inspirada en texturas de papel y marcas de corte para operarios y gerentes.
-*   **Backend (Java 21 / Spring Boot):** API REST robusta que maneja las reglas de negocio, persistencia relacional en PostgreSQL y la seguridad mediante tokens criptográficos JWT.
+El sistema sigue una arquitectura desacoplada y sincronizada:
+*   **Frontend (Angular 21):** Interfaz SPA intuitiva, accesibilidad e interacción mediante componentes **Spartan UI**, notificaciones en tiempo real con **Sonner**, manejo centralizado de errores HTTP e interfaces sincronizadas 1:1 con DTOs del backend.
+*   **Backend (Java 21 / Spring Boot 4):** API REST robusta con arquitectura por capas, DTOs inmutables (records Java 21), validación de entradas `@Valid`, persistencia relacional en PostgreSQL y seguridad JWT.
 
 ---
 
@@ -31,7 +31,8 @@ El sistema sigue una arquitectura desacoplada:
 | Tecnología | Propósito | Características Clave |
 | :--- | :--- | :--- |
 | **Angular 21** | Framework Core | Arquitectura reactiva con Signals, inyección de dependencias y `rxResource` para optimizar flujos asíncronos. |
-| **Spartan UI** | Biblioteca UI | Componentes accesibles e interactivos (Hlm & Brain) basados en Shadcn UI. |
+| **Spartan UI** | Biblioteca UI | Componentes accesibles e interactivos (Hlm & Brain) basados en Shadcn UI (`hlm-dialog`, `hlm-table`, `hlm-input`, `hlm-button`, `hlm-select`). |
+| **Sonner (Spartan UI)** | Notificaciones Toast | Retroalimentación flotante global para mensajes de confirmación y desglose de errores HTTP. |
 | **Tailwind CSS** | Estilos visuales | Diseño adaptativo con clases de utilidad y variables CSS de marca. |
 | **Vitest** | Suite de Pruebas | Ejecución ultra veloz de tests unitarios en reemplazo de Karma. |
 
@@ -47,19 +48,45 @@ El sistema sigue una arquitectura desacoplada:
 
 ---
 
+## 📸 Capturas de Pantalla
+
+<div align="center">
+
+### 📊 Dashboard Principal y Cola de Pedidos
+<img width="850" alt="Dashboard Principal - FacturImprenta" src="frontend/public/scot-1.png" />
+
+<br/><br/>
+
+### 🖨️ Cotizador Dinámico de Servicios
+<img width="850" alt="Cotizador Dinámico - FacturImprenta" src="frontend/public/scot-4.png" />
+
+<br/><br/>
+
+### 📖 Catálogo de Materiales y Acabados
+<img width="850" alt="Catálogo de Imprenta - FacturImprenta" src="frontend/public/scot-2.png" />
+
+<br/><br/>
+
+### 👥 Gestión de Usuarios y Accesos
+<img width="850" alt="Gestión de Usuarios - FacturImprenta" src="frontend/public/scot-3.png" />
+
+</div>
+
+---
+
 ## 🗺️ Arquitectura de Rutas y Roles en el Frontend
 
-El acceso al portal web está condicionado por roles (`admin` y `user`) controlados mediante Guards en Angular:
+El acceso al portal web está condicionado por roles (`ADMIN` y `OPERARIO`) controlados mediante Guards en Angular:
 
 | Vista | Ruta Frontend | Rol Requerido | Propósito |
 | :--- | :--- | :--- | :--- |
-| **Acceso Seguro** | `/login` | Público | Autenticación inicial del personal con credenciales. |
-| **Dashboard** | `/dashboard` | `user` / `admin` | Gráficos de ingresos, métricas y cola de pedidos recientes. |
-| **Cotizador** | `/cotizador` | `user` / `admin` | Calculadora interactiva de costos por ítem, material y acabados. |
-| **Ficha de Pedido** | `/pedidos/:id` | `user` / `admin` | Detalle, facturación y actualización de estado de producción del pedido. |
-| **Catálogo** | `/admin/catalogo` | Solo `admin` | Altas, bajas y modificaciones de materiales, acabados y tarifas base. |
-| **Usuarios** | `/admin/usuarios` | Solo `admin` | Gestión del personal interno que accede al sistema. |
-| **Clientes** | `/clientes` | `user` / `admin` | Base de datos de clientes para el seguimiento del negocio. |
+| **Acceso Seguro** | `/login` | Público | Autenticación inicial del personal con credenciales JWT. |
+| **Dashboard** | `/dashboard` | `OPERARIO` / `ADMIN` | Gráficos de ingresos, métricas y cola de pedidos recientes. |
+| **Cotizador** | `/cotizador` | `OPERARIO` / `ADMIN` | Calculadora interactiva de costos por ítem, material y acabados. |
+| **Ficha de Pedido** | `/pedidos/:id` | `OPERARIO` / `ADMIN` | Detalle, facturación y actualización de estado de producción del pedido. |
+| **Catálogo** | `/admin/catalogo` | Solo `ADMIN` | Altas, bajas y edición (PUT) de materiales, acabados y tarifas base mediante modales Spartan UI. |
+| **Usuarios** | `/admin/usuarios` | Solo `ADMIN` | Gestión y edición de usuarios internos con protección de la cuenta en sesión actual. |
+| **Clientes** | `/clientes` | `OPERARIO` / `ADMIN` | Base de datos comercial de clientes con formularios y modales de edición. |
 
 ---
 
@@ -69,46 +96,50 @@ El backend se ha estructurado bajo un diseño de arquitectura por capas (Layered
 
 | Capa / Paquete | Responsabilidad Principal | Clases / Conceptos Clave |
 | :--- | :--- | :--- |
-| **Controladores (`controller/`)** | **Exposición REST & Validación**<br>Recibe solicitudes HTTP del cliente, valida los datos iniciales de entrada y delega el flujo a la capa de servicio. | Anotaciones `@RestController`, `@GetMapping`, `@PostMapping`, `@Valid`. |
+| **Controladores (`controller/`)** | **Exposición REST & Validación**<br>Recibe solicitudes HTTP del cliente, valida los datos iniciales de entrada (`@Valid`) y delega el flujo a la capa de servicio. | Anotaciones `@RestController`, `@GetMapping`, `@PostMapping`, `@PutMapping`, `@DeleteMapping`. |
 | **Servicios (`service/`)** | **Lógica y Reglas de Negocio**<br>Contiene las reglas de negocio del sistema de imprenta (procesamiento de cotizaciones, validaciones financieras, actualización de estados de pedidos). | Interfaces y sus implementaciones anotadas con `@Service`. |
 | **Repositorios (`repository/`)** | **Persistencia y Acceso a Datos**<br>Define el mapeo de operaciones de bases de datos. Permite ejecutar consultas directas de forma abstracta. | Interfaces que heredan de `JpaRepository` (Spring Data JPA). |
 | **Modelos (`model/`)** | **Entidades de Dominio**<br>Representa las tablas de la base de datos relacional PostgreSQL en el código. | Clases anotadas con `@Entity`, `@Table`, `@Id`, relaciones `@ManyToOne`. |
-| **DTOs (`dto/`)** | **Intercambio Seguro de Datos**<br>Estructuras que desacoplan la persistencia física (JPA) de la interfaz de la API. Evitan exponer campos sensibles del modelo. | Clases Request/Response y uso de Java `record` para inmutabilidad. |
-| **Seguridad (`security/`)** | **Autenticación e Intercepción**<br>Filtra peticiones entrantes para leer tokens JWT, establece el contexto de seguridad de Spring Security y maneja políticas CORS. | `JwtAuthenticationFilter`, `SecurityConfig`, roles (`ROLE_ADMIN`). |
-| **Excepciones (`exception/`)** | **Manejo Centralizado de Errores**<br>Maneja errores de forma global capturando fallos y retornando un JSON con formato amigable y el código HTTP preciso. | Clases `@RestControllerAdvice`, `@ExceptionHandler`. |
+| **DTOs (`dto/`)** | **Intercambio Seguro de Datos**<br>Estructuras inmutables que desacoplan la persistencia física (JPA) de la interfaz de la API. | Java `record` (`MaterialRequest`/`MaterialResponse`, `ClienteRequest`/`ClienteResponse`, etc.). |
+| **Seguridad (`security/`)** | **Autenticación e Intercepción**<br>Filtra peticiones entrantes para leer tokens JWT, establece el contexto de seguridad de Spring Security y maneja políticas CORS. | `JwtAuthenticationFilter`, `SecurityConfig`, roles (`ROLE_ADMIN`, `ROLE_OPERARIO`). |
+| **Excepciones (`exception/`)** | **Manejo Centralizado de Errores**<br>Maneja errores de forma global capturando fallos y retornando un JSON `ErrorResponse` con `timestamp`, `status`, `message` y `fieldErrors`. | `@RestControllerAdvice`, `@ExceptionHandler`. |
 
 ---
 
 ## 🔌 API REST (Endpoints del Backend y Seguridad)
 
-El backend de Spring Boot expone servicios modulares mediante API REST. A continuación se detallan las rutas, los métodos HTTP y las restricciones de acceso basadas en roles:
+El backend de Spring Boot expose servicios modulares mediante API REST. A continuación se detallan las rutas, los métodos HTTP y las restricciones de acceso basadas en roles:
 
 | Módulo | Método | Ruta (Endpoint) | Seguridad (Rol) | Descripción |
 | :--- | :---: | :--- | :--- | :--- |
 | **Auth** | `POST` | `/api/auth/login` | Público | Autenticación y generación de token de sesión JWT. |
-| **Pedidos** | `GET` | `/api/pedidos` | Autenticado (`USER`/`ADMIN`) | Obtiene la lista completa de pedidos. |
-| | `GET` | `/api/pedidos/{id}` | Autenticado (`USER`/`ADMIN`) | Detalle técnico y estado financiero de un pedido. |
-| | `GET` | `/api/pedidos/estado` | Autenticado (`USER`/`ADMIN`) | Filtra los pedidos según su estado de producción. |
-| | `POST` | `/api/pedidos` | Autenticado (`USER`/`ADMIN`) | Registra un nuevo pedido en el sistema. |
-| | `PATCH` | `/api/pedidos/{id}/estado` | Autenticado (`USER`/`ADMIN`) | Transición de fase productiva de un pedido. |
-| **Cotización** | `POST` | `/api/cotizaciones` | Autenticado (`USER`/`ADMIN`) | Calcula el presupuesto estimado de impresión de manera dinámica. |
-| **Materiales** | `GET` | `/api/materiales` | Autenticado (`USER`/`ADMIN`) | Listado de los materiales en el catálogo base de imprenta. |
-| | `GET` | `/api/materiales/{id}` | Autenticado (`USER`/`ADMIN`) | Obtiene el detalle de un material. |
+| **Pedidos** | `GET` | `/api/pedidos` | Autenticado (`OPERARIO`/`ADMIN`) | Obtiene la lista completa de pedidos. |
+| | `GET` | `/api/pedidos/{id}` | Autenticado (`OPERARIO`/`ADMIN`) | Detalle técnico y estado financiero de un pedido. |
+| | `GET` | `/api/pedidos/estado` | Autenticado (`OPERARIO`/`ADMIN`) | Filtra los pedidos según su estado de producción. |
+| | `POST` | `/api/pedidos` | Autenticado (`OPERARIO`/`ADMIN`) | Registra un nuevo pedido en el sistema. |
+| | `PATCH` | `/api/pedidos/{id}/estado` | Autenticado (`OPERARIO`/`ADMIN`) | Transición de fase productiva de un pedido. |
+| **Cotización** | `POST` | `/api/cotizaciones` | Autenticado (`OPERARIO`/`ADMIN`) | Calcula el presupuesto estimado de impresión de manera dinámica. |
+| **Materiales** | `GET` | `/api/materiales` | Autenticado (`OPERARIO`/`ADMIN`) | Listado de los materiales en el catálogo base de imprenta. |
+| | `GET` | `/api/materiales/{id}` | Autenticado (`OPERARIO`/`ADMIN`) | Obtiene el detalle de un material. |
 | | `POST` | `/api/materiales` | Solo **`ADMIN`** | Registra un nuevo tipo de material y su costo por cm². |
+| | `PUT` | `/api/materiales/{id}` | Solo **`ADMIN`** | Actualiza los datos de un material existente. |
 | | `DELETE` | `/api/materiales/{id}` | Solo **`ADMIN`** | Elimina permanentemente un material del catálogo. |
-| **Acabados** | `GET` | `/api/acabados` | Autenticado (`USER`/`ADMIN`) | Listado de acabados de impresión disponibles. |
-| | `GET` | `/api/acabados/{id}` | Autenticado (`USER`/`ADMIN`) | Obtiene información de un acabado específico. |
+| **Acabados** | `GET` | `/api/acabados` | Autenticado (`OPERARIO`/`ADMIN`) | Listado de acabados de impresión disponibles. |
+| | `GET` | `/api/acabados/{id}` | Autenticado (`OPERARIO`/`ADMIN`) | Obtiene información de un acabado específico. |
 | | `POST` | `/api/acabados` | Solo **`ADMIN`** | Registra una nueva técnica de acabado y su tarifa. |
+| | `PUT` | `/api/acabados/{id}` | Solo **`ADMIN`** | Actualiza la información y tarifa de un acabado. |
 | | `DELETE` | `/api/acabados/{id}` | Solo **`ADMIN`** | Elimina permanentemente una técnica de acabado. |
-| **Clientes** | `GET` | `/api/clientes` | Autenticado (`USER`/`ADMIN`) | Listado completo de la cartera de clientes. |
-| | `GET` | `/api/clientes/{id}` | Autenticado (`USER`/`ADMIN`) | Ficha de contacto y detalles de un cliente. |
-| | `POST` | `/api/clientes` | Autenticado (`USER`/`ADMIN`) | Registra un nuevo cliente en el sistema. |
+| **Clientes** | `GET` | `/api/clientes` | Autenticado (`OPERARIO`/`ADMIN`) | Listado completo de la cartera de clientes. |
+| | `GET` | `/api/clientes/{id}` | Autenticado (`OPERARIO`/`ADMIN`) | Ficha de contacto y detalles de un cliente. |
+| | `POST` | `/api/clientes` | Autenticado (`OPERARIO`/`ADMIN`) | Registra un nuevo cliente en el sistema. |
+| | `PUT` | `/api/clientes/{id}` | Autenticado (`OPERARIO`/`ADMIN`) | Actualiza los datos comerciales de un cliente. |
 | | `DELETE` | `/api/clientes/{id}` | Solo **`ADMIN`** | Elimina un cliente de la base de datos. |
-| **Pagos** | `GET` | `/api/pedidos/{idPedido}/pagos` | Autenticado (`USER`/`ADMIN`) | Listado histórico de abonos y deudas de un pedido. |
-| | `POST` | `/api/pedidos/{idPedido}/pagos` | Autenticado (`USER`/`ADMIN`) | Registra un nuevo pago/abono sobre un pedido pendiente. |
+| **Pagos** | `GET` | `/api/pedidos/{idPedido}/pagos` | Autenticado (`OPERARIO`/`ADMIN`) | Listado histórico de abonos y deudas de un pedido. |
+| | `POST` | `/api/pedidos/{idPedido}/pagos` | Autenticado (`OPERARIO`/`ADMIN`) | Registra un nuevo pago/abono sobre un pedido pendiente. |
 | **Usuarios** | `GET` | `/api/usuarios` | Solo **`ADMIN`** | Obtiene el listado de todo el personal registrado. |
 | | `GET` | `/api/usuarios/{id}` | Solo **`ADMIN`** | Consulta detalles de perfil del personal interno. |
 | | `POST` | `/api/usuarios` | Solo **`ADMIN`** | Registra un nuevo usuario del sistema asignando rol. |
+| | `PUT` | `/api/usuarios/{id}` | Solo **`ADMIN`** | Actualiza los datos y rol de un usuario existente. |
 | | `DELETE` | `/api/usuarios/{id}` | Solo **`ADMIN`** | Elimina la cuenta y revoca el acceso de un usuario. |
 
 > [!NOTE]
@@ -131,9 +162,9 @@ proyecto-printing/
 │   │   │   │   ├── model/           # Entidades JPA mapeadas a PostgreSQL
 │   │   │   │   ├── repository/      # Interfaces de acceso a base de datos
 │   │   │   │   ├── service/         # Clases de lógica de negocio y reglas comerciales
-│   │   │   │   ├── dto/             # Data Transfer Objects para transferencias seguras
+│   │   │   │   ├── dto/             # Data Transfer Objects (records) para transferencias seguras
 │   │   │   │   ├── security/        # Filtros JWT y configuraciones de Spring Security
-│   │   │   │   └── exception/       # Manejo centralizado de excepciones de negocio
+│   │   │   │   └── exception/       # Manejo centralizado de excepciones (ErrorResponse)
 │   │   │   └── resources/
 │   │   │       └── application.properties  # Configuración (DB Neon, JWT, variables)
 │   │   └── test/                    # Pruebas unitarias e integración de JUnit/MockMvc
@@ -143,10 +174,10 @@ proyecto-printing/
 └── frontend/                        # Frontend en Angular 21
     ├── src/
     │   ├── app/
-    │   │   ├── core/                # Elementos globales (guards, interceptores, modelos, servicios HTTP)
+    │   │   ├── core/                # Elementos globales (guards, errorInterceptor, modelos DTO, servicios HTTP)
     │   │   ├── features/            # Vistas agrupadas modularmente (auth, dashboard)
     │   │   ├── shared/              # Pipes para estados, directivas y utilidades compartidas
-    │   │   └── components/          # Componentes reutilizables integrados con Spartan UI
+    │   │   └── components/          # Componentes Spartan UI (dialog, table, button, input, sonner)
     │   ├── environments/            # Parámetros del entorno de producción y desarrollo (API Url)
     │   └── index.html               # Archivo HTML raíz
     ├── angular.json                 # Configuración de build de Angular CLI
@@ -227,4 +258,4 @@ Para replicar y desplegar el sistema localmente, sigue los siguientes pasos:
 
 ## 📌 Estado del Proyecto
 
-✅ **Finalizado** — MVP funcional completo con arquitectura desacoplada Frontend-Backend y persistencia en base de datos.
+✅ **Finalizado** — Sistema completo sincronizado Frontend (Angular 21 + Spartan UI) y Backend (Spring Boot 4 + Java 21) con operaciones CRUD, DTOs inmutables, interceptor de errores y notificaciones Sonner.
