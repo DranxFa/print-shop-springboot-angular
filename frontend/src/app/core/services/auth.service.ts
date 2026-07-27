@@ -5,8 +5,9 @@ import { tap } from 'rxjs';
 import { LoginRequest, LoginResponse, Rol } from '../models/auth.model';
 import { environment } from '../../../environments/environment';
 
-interface UsuarioActual {
+export interface UsuarioActual {
   nombre: string;
+  email: string;
   rol: Rol;
 }
 
@@ -17,11 +18,8 @@ const USUARIO_KEY = 'imprenta_usuario';
   providedIn: 'root',
 })
 export class AuthService {
-  // Signal privado con el estado real; se expone solo lectura afuera
   private usuarioActual = signal<UsuarioActual | null>(this.recuperarUsuarioGuardado());
  
-  // Cualquier componente puede leer esto de forma reactiva:
-  // authService.estaAutenticado() en una plantilla, por ejemplo
   readonly estaAutenticado = computed(() => this.usuarioActual() !== null);
   readonly usuario = this.usuarioActual.asReadonly();
   readonly esAdmin = computed(() => this.usuarioActual()?.rol === 'ADMIN');
@@ -32,7 +30,7 @@ export class AuthService {
     return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/login`, credenciales).pipe(
       tap(response => {
         localStorage.setItem(TOKEN_KEY, response.token);
-        const usuario: UsuarioActual = { nombre: response.nombre, rol: response.rol };
+        const usuario: UsuarioActual = { nombre: response.nombre, email: credenciales.email, rol: response.rol };
         localStorage.setItem(USUARIO_KEY, JSON.stringify(usuario));
         this.usuarioActual.set(usuario);
       })
@@ -50,9 +48,6 @@ export class AuthService {
     return localStorage.getItem(TOKEN_KEY);
   }
  
-  // Al recargar la página, Angular pierde el estado en memoria —
-  // esto reconstruye el Signal a partir de lo guardado en localStorage,
-  // para que el usuario siga "logueado" tras un refresh.
   private recuperarUsuarioGuardado(): UsuarioActual | null {
     const guardado = localStorage.getItem(USUARIO_KEY);
     return guardado ? JSON.parse(guardado) : null;

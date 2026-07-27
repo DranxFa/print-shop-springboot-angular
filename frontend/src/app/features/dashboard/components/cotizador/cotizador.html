@@ -21,8 +21,7 @@
               <hlm-select-group>
                 <hlm-select-label>Materiales</hlm-select-label>
                 @for (m of materiales(); track m.id) {
-                <hlm-select-item [value]="m.id">{{ m.nombre }} (S/ {{ m.precioM2.toFixed(2) }}/{{ m.unidad
-                  }})</hlm-select-item>
+                <hlm-select-item [value]="m.id">{{ m.nombre }} (S/ {{ m.costoCm2 }}/cm²)</hlm-select-item>
                 }
               </hlm-select-group>
             </hlm-select-content>
@@ -129,7 +128,7 @@
             </hlm-select-trigger>
             <hlm-select-content *hlmSelectPortal>
               @for (c of clientes(); track c.id) {
-              <hlm-select-item [value]="c.id">{{ c.nombre }} (RUC/DNI: {{ c.rucDni || 'S/D' }})</hlm-select-item>
+              <hlm-select-item [value]="c.id">{{ c.nombre }} (Doc: {{ c.documento || 'S/D' }})</hlm-select-item>
               }
             </hlm-select-content>
           </hlm-select>

@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { Material } from '../models/catalogo.model';
+import { MaterialRequest, MaterialResponse } from '../models/catalogo.model';
 import { tap } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -9,19 +9,33 @@ export class MaterialService {
   private http = inject(HttpClient);
   private baseUrl = `${environment.apiUrl}/materiales`;
 
-  private _materiales = signal<Material[]>([]);
+  private _materiales = signal<MaterialResponse[]>([]);
   readonly materiales = this._materiales.asReadonly();
 
   buscarTodos() {
-    return this.http.get<Material[]>(this.baseUrl).pipe(
-      tap(data => this._materiales.set(data))
+    return this.http.get<MaterialResponse[]>(this.baseUrl).pipe(
+      tap(data => {
+        this._materiales.set(data)
+      console.log(data)})
     );
   }
 
-  crear(material: Partial<Material>) {
-    return this.http.post<Material>(this.baseUrl, material).pipe(
+  buscarPorId(id: number) {
+    return this.http.get<MaterialResponse>(`${this.baseUrl}/${id}`);
+  }
+
+  crear(material: MaterialRequest) {
+    return this.http.post<MaterialResponse>(this.baseUrl, material).pipe(
       tap(newMat => {
         this._materiales.update(list => [...list, newMat]);
+      })
+    );
+  }
+
+  actualizar(id: number, material: MaterialRequest) {
+    return this.http.put<MaterialResponse>(`${this.baseUrl}/${id}`, material).pipe(
+      tap(updatedMat => {
+        this._materiales.update(list => list.map(m => m.id === id ? updatedMat : m));
       })
     );
   }

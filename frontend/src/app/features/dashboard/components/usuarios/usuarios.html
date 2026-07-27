@@ -1,5 +1,5 @@
 <div class="min-h-screen bg-[var(--color-paper)] animate-fade-in-up">
-  <main class="mx-auto max-w-4xl px-6 py-6">
+  <main class="mx-auto max-w-5xl px-6 py-6">
 
     <!-- Header -->
     <div
@@ -24,24 +24,24 @@
         <form [formGroup]="form" (ngSubmit)="crearUsuario()" class="flex flex-col gap-3">
           <div class="flex flex-col gap-1">
             <label hlmLabel for="nombre">Nombre completo</label>
-            <input hlmInput id="nombre" formControlName="nombre" placeholder="ej. Carlos Pérez" />
+            <input hlmInput id="nombre" formControlName="nombre" placeholder="ej. Carlos Pérez" class="border border-neutral-300 px-3 py-1.5 rounded-sm bg-white" />
           </div>
 
           <div class="flex flex-col gap-1">
             <label hlmLabel for="email">Correo electrónico</label>
-            <input hlmInput id="email" type="email" formControlName="email" placeholder="ej. carlos@imprenta.com" />
+            <input hlmInput id="email" type="email" formControlName="email" placeholder="ej. carlos@imprenta.com" class="border border-neutral-300 px-3 py-1.5 rounded-sm bg-white" />
           </div>
 
           <div class="flex flex-col gap-1">
             <label hlmLabel for="password">Contraseña</label>
             <input hlmInput id="password" type="password" formControlName="password"
-              placeholder="Mínimo 4 caracteres" />
+              placeholder="Mínimo 4 caracteres" class="border border-neutral-300 px-3 py-1.5 rounded-sm bg-white" />
           </div>
 
           <div class="flex flex-col gap-1">
             <label hlmLabel>Rol en el sistema</label>
             <hlm-select formControlName="rol" (valueChange)="onRolChange($event)">
-              <hlm-select-trigger class="border flex w-full cursor-pointer">
+              <hlm-select-trigger class="border border-neutral-300 flex w-full cursor-pointer bg-white rounded-sm">
                 <hlm-select-value placeholder="Seleccione un rol" />
               </hlm-select-trigger>
               <hlm-select-content *hlmSelectPortal>
@@ -89,10 +89,20 @@
                   </span>
                 </td>
                 <td hlmTd class="px-4 py-3 text-right">
-                  <button (click)="eliminarUsuario(u.id)"
-                    class="text-xs text-[var(--color-accent)] font-semibold hover:underline cursor-pointer">
-                    Eliminar
-                  </button>
+                  @if (u.email === usuarioActual()?.email || u.nombre === usuarioActual()?.nombre) {
+                    <span class="text-xs text-neutral-400 italic font-mono bg-neutral-100 px-2 py-0.5 border border-neutral-200">Usuario actual</span>
+                  } @else {
+                    <div class="flex justify-end gap-2">
+                      <button (click)="abrirEditarUsuario(u)"
+                        class="text-xs text-neutral-600 hover:text-black font-semibold cursor-pointer">
+                        Editar
+                      </button>
+                      <button (click)="eliminarUsuario(u.id)"
+                        class="text-xs text-[var(--color-accent)] font-semibold hover:underline cursor-pointer">
+                        Eliminar
+                      </button>
+                    </div>
+                  }
                 </td>
               </tr>
               } @empty {
@@ -109,3 +119,56 @@
     </div>
   </main>
 </div>
+
+<!-- Modal Edición Usuario -->
+@if (usuarioEditando()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
+    <div class="w-full max-w-md bg-white border-2 border-neutral-300 p-6 rounded-sm shadow-2xl crop-marks relative animate-fade-in-up">
+      <div class="flex justify-between items-center mb-4 pb-2 border-b border-neutral-200">
+        <div>
+          <h3 class="text-lg font-bold text-[var(--color-ink)] uppercase">Editar Usuario</h3>
+          <p class="text-xs text-neutral-500">Actualice el perfil y rol del personal interno.</p>
+        </div>
+        <button (click)="usuarioEditando.set(null)" class="text-neutral-400 hover:text-black font-bold text-lg cursor-pointer">✕</button>
+      </div>
+
+      <form [formGroup]="formEdit" (ngSubmit)="guardarEditUsuario()" class="flex flex-col gap-4 py-2">
+        <div class="flex flex-col gap-1.5">
+          <label hlmLabel for="editNombreUsr" class="font-medium text-neutral-700">Nombre completo</label>
+          <input hlmInput id="editNombreUsr" formControlName="nombre" class="w-full border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-800 rounded-sm focus:border-neutral-900 outline-none" />
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label hlmLabel for="editEmailUsr" class="font-medium text-neutral-700">Correo electrónico</label>
+          <input hlmInput id="editEmailUsr" type="email" formControlName="email" class="w-full border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-800 rounded-sm focus:border-neutral-900 outline-none" />
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label hlmLabel for="editPasswordUsr" class="font-medium text-neutral-700">Nueva Contraseña (Opcional)</label>
+          <input hlmInput id="editPasswordUsr" type="password" formControlName="password" placeholder="Dejar en blanco para mantener la actual" class="w-full border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-800 rounded-sm focus:border-neutral-900 outline-none" />
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label hlmLabel class="font-medium text-neutral-700">Rol en el sistema</label>
+          <hlm-select formControlName="rol" (valueChange)="onEditRolChange($event)">
+            <hlm-select-trigger class="border border-neutral-300 bg-white flex w-full cursor-pointer text-sm rounded-sm">
+              <hlm-select-value />
+            </hlm-select-trigger>
+            <hlm-select-content *hlmSelectPortal>
+              <hlm-select-group>
+                <hlm-select-label>Roles</hlm-select-label>
+                <hlm-select-item value="OPERARIO">OPERARIO (Taller)</hlm-select-item>
+                <hlm-select-item value="ADMIN">ADMINISTRADOR</hlm-select-item>
+              </hlm-select-group>
+            </hlm-select-content>
+          </hlm-select>
+        </div>
+
+        <div class="mt-4 flex justify-end gap-2 pt-2 border-t border-neutral-100">
+          <button hlmBtn type="button" variant="outline" (click)="usuarioEditando.set(null)" class="cursor-pointer">Cancelar</button>
+          <button hlmBtn type="submit" [disabled]="formEdit.invalid || guardando()" class="cursor-pointer">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

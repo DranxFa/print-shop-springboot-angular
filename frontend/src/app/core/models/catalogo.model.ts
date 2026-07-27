@@ -1,20 +1,55 @@
-export interface Material {
-  id: number;
+// Materiales
+export interface MaterialRequest {
   nombre: string;
-  precioM2: number;
-  unidad: string;
+  descripcion?: string;
+  costoCm2: number;
+  stockMinimo: number;
 }
- 
-export interface Acabado {
+
+export interface MaterialResponse {
   id: number;
   nombre: string;
-  costoFijo: number;
-  costoM2: number;
+  descripcion?: string;
+  costoCm2: number;
+  stockMinimo: number;
 }
+
+export type Material = MaterialResponse;
  
-export interface Cliente {
+// Acabados
+export interface AcabadoRequest {
+  nombre: string;
+  descripcion?: string;
+  precioBase: number;
+  unidadMedida: string;
+}
+
+export interface AcabadoResponse {
   id: number;
   nombre: string;
+  descripcion?: string;
+  precioBase: number;
+  unidadMedida: string;
+}
+
+export type Acabado = AcabadoResponse;
+ 
+// Clientes
+export interface ClienteRequest {
+  nombre: string;
+  email: string;
   telefono?: string;
-  rucDni?: string;
+  direccion?: string;
+  documento: string;
 }
+
+export interface ClienteResponse {
+  id: number;
+  nombre: string;
+  email: string;
+  telefono?: string;
+  direccion?: string;
+  documento: string;
+}
+
+export type Cliente = ClienteResponse;

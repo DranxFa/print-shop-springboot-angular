@@ -1,34 +1,39 @@
 <div class="min-h-screen bg-[var(--color-paper)] animate-fade-in-up">
-  <main class="mx-auto max-w-4xl px-6 py-6">
-    <!-- Rótulo de Advertencia de Rol -->
-    <div class="mb-6 flex justify-between items-center border border-[var(--color-border-warm)] bg-white px-5 py-3 shadow-sm crop-marks relative">
+  <main class="mx-auto max-w-6xl px-6 py-6">
+    <!-- Header -->
+    <div class="mb-6 flex justify-between items-center border border-[var(--color-border-warm)] bg-white px-6 py-4 shadow-sm crop-marks relative">
       <div class="flex flex-col">
-        <p class="font-ticket text-[9px] uppercase tracking-widest text-[var(--color-accent)] font-semibold">Acceso Restringido</p>
-        <h1 class="text-base font-bold text-[var(--color-ink)] uppercase tracking-tight">Catálogo de Imprenta</h1>
+        <p class="font-ticket text-xs uppercase tracking-widest text-[var(--color-accent)] font-semibold">Acceso Restringido</p>
+        <h1 class="text-2xl font-bold text-[var(--color-ink)] uppercase tracking-tight">Catálogo de Imprenta</h1>
       </div>
-      <span class="font-ticket text-[10px] text-neutral-400 border border-neutral-200 px-2 py-0.5 uppercase bg-neutral-50">Solo Administradores</span>
+      <span class="font-ticket text-xs text-neutral-500 border border-neutral-200 px-2 py-0.5 uppercase bg-neutral-50">Solo Administradores</span>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
       <!-- MATERIALES -->
       <div class="crop-marks relative rounded-sm border border-[var(--color-border-warm)] bg-white p-5 shadow-sm">
-        <h2 class="mb-4 text-sm font-bold text-[var(--color-ink)] uppercase tracking-tight">Materiales</h2>
+        <h2 class="mb-4 text-lg font-bold text-[var(--color-ink)] uppercase tracking-tight">Materiales</h2>
 
         <form [formGroup]="formMaterial" (ngSubmit)="crearMaterial()" class="mb-6 flex flex-col gap-3">
           <div class="flex flex-col gap-1">
             <label hlmLabel for="nombreMaterial">Nombre del material</label>
-            <input hlmInput id="nombreMaterial" formControlName="nombre" placeholder="ej. Lona banner" />
+            <input hlmInput id="nombreMaterial" formControlName="nombre" placeholder="ej. Lona Banner 13oz" class="w-full border border-neutral-300 bg-white px-3 py-1.5 rounded-sm text-sm focus:border-neutral-900 outline-none" />
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label hlmLabel for="descripcionMaterial">Descripción (Opcional)</label>
+            <input hlmInput id="descripcionMaterial" formControlName="descripcion" placeholder="ej. Lona mate de alta resistencia" class="w-full border border-neutral-300 bg-white px-3 py-1.5 rounded-sm text-sm focus:border-neutral-900 outline-none" />
           </div>
 
           <div class="flex gap-3">
             <div class="w-1/2 flex flex-col gap-1">
-              <label hlmLabel for="precioM2">Precio por m² (S/)</label>
-              <input hlmInput id="precioM2" type="number" step="0.01" formControlName="precioM2" placeholder="0.00" class="font-ticket" />
+              <label hlmLabel for="costoCm2">Costo / cm² (S/)</label>
+              <input hlmInput id="costoCm2" type="number" step="0.0001" formControlName="costoCm2" placeholder="0.0050" class="font-ticket w-full border border-neutral-300 bg-white px-3 py-1.5 rounded-sm text-sm focus:border-neutral-900 outline-none" />
             </div>
             <div class="w-1/2 flex flex-col gap-1">
-              <label hlmLabel for="unidad">Unidad de medida</label>
-              <input hlmInput id="unidad" formControlName="unidad" placeholder="m2" />
+              <label hlmLabel for="stockMinimo">Stock Mínimo</label>
+              <input hlmInput id="stockMinimo" type="number" formControlName="stockMinimo" placeholder="10" class="font-ticket w-full border border-neutral-300 bg-white px-3 py-1.5 rounded-sm text-sm focus:border-neutral-900 outline-none" />
             </div>
           </div>
 
@@ -37,37 +42,71 @@
           </button>
         </form>
 
-        <div class="flex flex-col">
-          @for (m of materiales(); track m.id) {
-            <div class="divisor-ticket flex items-center justify-between py-3 text-sm first:border-t-0 first:pt-0">
-              <span class="text-neutral-700 font-medium">
-                {{ m.nombre }} — 
-                <span class="font-ticket text-xs bg-neutral-50 px-1.5 py-0.5 border border-neutral-200 text-neutral-600">S/ {{ m.precioM2.toFixed(2) }}/{{ m.unidad }}</span>
-              </span>
-              <button (click)="eliminarMaterial(m.id)" class="text-xs text-[var(--color-accent)] font-semibold hover:underline cursor-pointer">Eliminar</button>
-            </div>
-          }
+        <div hlmTableContainer class="overflow-hidden border border-[var(--color-border-warm)] bg-white">
+          <table hlmTable class="w-full text-sm">
+            <thead hlmTHead>
+              <tr hlmTr class="border-b border-[var(--color-border-warm)] hover:bg-transparent">
+                <th hlmTh class="px-3 py-2.5 font-semibold text-neutral-500">Material</th>
+                <th hlmTh class="px-3 py-2.5 font-semibold text-neutral-500">Costo / cm²</th>
+                <th hlmTh class="px-3 py-2.5 font-semibold text-neutral-500 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody hlmTBody>
+              @for (m of materiales(); track m.id) {
+                <tr hlmTr class="divisor-ticket hover:bg-neutral-50/50 transition-colors">
+                  <td hlmTd class="px-3 py-2.5">
+                    <div class="flex flex-col">
+                      <span class="font-medium text-neutral-800">{{ m.nombre }}</span>
+                      @if (m.descripcion) {
+                        <span class="text-xs text-neutral-400">{{ m.descripcion }}</span>
+                      }
+                    </div>
+                  </td>
+                  <td hlmTd class="px-3 py-2.5 font-mono text-xs text-neutral-700">
+                    <span class="bg-neutral-100 border border-neutral-200 px-2 py-0.5 font-ticket rounded-xs">
+                      S/ {{ formatCostoMat(m) }}
+                    </span>
+                  </td>
+                  <td hlmTd class="px-3 py-2.5 text-right">
+                    <div class="flex justify-end gap-2">
+                      <button (click)="abrirEditarMaterial(m)" class="text-xs text-neutral-600 hover:text-black font-semibold cursor-pointer">Editar</button>
+                      <button (click)="eliminarMaterial(m.id)" class="text-xs text-[var(--color-accent)] font-semibold hover:underline cursor-pointer">Eliminar</button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="3" class="p-4 text-center text-xs text-neutral-400 font-medium">No hay materiales registrados.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
         </div>
       </div>
 
       <!-- ACABADOS -->
       <div class="crop-marks relative rounded-sm border border-[var(--color-border-warm)] bg-white p-5 shadow-sm">
-        <h2 class="mb-4 text-sm font-bold text-[var(--color-ink)] uppercase tracking-tight">Acabados</h2>
+        <h2 class="mb-4 text-lg font-bold text-[var(--color-ink)] uppercase tracking-tight">Acabados</h2>
 
         <form [formGroup]="formAcabado" (ngSubmit)="crearAcabado()" class="mb-6 flex flex-col gap-3">
           <div class="flex flex-col gap-1">
             <label hlmLabel for="nombreAcabado">Nombre del acabado</label>
-            <input hlmInput id="nombreAcabado" formControlName="nombre" placeholder="ej. Ojales" />
+            <input hlmInput id="nombreAcabado" formControlName="nombre" placeholder="ej. Ojales de Aluminio" class="w-full border border-neutral-300 bg-white px-3 py-1.5 rounded-sm text-sm focus:border-neutral-900 outline-none" />
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label hlmLabel for="descripcionAcabado">Descripción (Opcional)</label>
+            <input hlmInput id="descripcionAcabado" formControlName="descripcion" placeholder="ej. Ojales colocados cada 50cm" class="w-full border border-neutral-300 bg-white px-3 py-1.5 rounded-sm text-sm focus:border-neutral-900 outline-none" />
           </div>
 
           <div class="flex gap-3">
             <div class="w-1/2 flex flex-col gap-1">
-              <label hlmLabel for="costoFijo">Costo fijo (S/)</label>
-              <input hlmInput id="costoFijo" type="number" step="0.01" formControlName="costoFijo" placeholder="0.00" class="font-ticket" />
+              <label hlmLabel for="precioBase">Precio Base (S/)</label>
+              <input hlmInput id="precioBase" type="number" step="0.01" formControlName="precioBase" placeholder="0.00" class="font-ticket w-full border border-neutral-300 bg-white px-3 py-1.5 rounded-sm text-sm focus:border-neutral-900 outline-none" />
             </div>
             <div class="w-1/2 flex flex-col gap-1">
-              <label hlmLabel for="costoM2">Costo por m² (S/)</label>
-              <input hlmInput id="costoM2" type="number" step="0.01" formControlName="costoM2" placeholder="0.00" class="font-ticket" />
+              <label hlmLabel for="unidadMedida">Unidad Medida</label>
+              <input hlmInput id="unidadMedida" formControlName="unidadMedida" placeholder="ej. Unidad / Metro" class="w-full border border-neutral-300 bg-white px-3 py-1.5 rounded-sm text-sm focus:border-neutral-900 outline-none" />
             </div>
           </div>
 
@@ -76,19 +115,134 @@
           </button>
         </form>
 
-        <div class="flex flex-col">
-          @for (a of acabados(); track a.id) {
-            <div class="divisor-ticket flex items-center justify-between py-3 text-sm first:border-t-0 first:pt-0">
-              <span class="text-neutral-700 font-medium">
-                {{ a.nombre }} — 
-                <span class="font-ticket text-xs bg-neutral-50 px-1.5 py-0.5 border border-neutral-200 text-neutral-600">S/ {{ a.costoFijo.toFixed(2) }} + S/ {{ a.costoM2.toFixed(2) }}/m²</span>
-              </span>
-              <button (click)="eliminarAcabado(a.id)" class="text-xs text-[var(--color-accent)] font-semibold hover:underline cursor-pointer">Eliminar</button>
-            </div>
-          }
+        <div hlmTableContainer class="overflow-hidden border border-[var(--color-border-warm)] bg-white">
+          <table hlmTable class="w-full text-sm">
+            <thead hlmTHead>
+              <tr hlmTr class="border-b border-[var(--color-border-warm)] hover:bg-transparent">
+                <th hlmTh class="px-3 py-2.5 font-semibold text-neutral-500">Acabado</th>
+                <th hlmTh class="px-3 py-2.5 font-semibold text-neutral-500">Tarifa</th>
+                <th hlmTh class="px-3 py-2.5 font-semibold text-neutral-500 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody hlmTBody>
+              @for (a of acabados(); track a.id) {
+                <tr hlmTr class="divisor-ticket hover:bg-neutral-50/50 transition-colors">
+                  <td hlmTd class="px-3 py-2.5">
+                    <div class="flex flex-col">
+                      <span class="font-medium text-neutral-800">{{ a.nombre }}</span>
+                      @if (a.descripcion) {
+                        <span class="text-xs text-neutral-400">{{ a.descripcion }}</span>
+                      }
+                    </div>
+                  </td>
+                  <td hlmTd class="px-3 py-2.5 font-mono text-xs text-neutral-700">
+                    <span class="bg-neutral-100 border border-neutral-200 px-2 py-0.5 font-ticket rounded-xs">
+                      S/ {{ formatPrecioAcab(a) }} ({{ getUnidadAcab(a) }})
+                    </span>
+                  </td>
+                  <td hlmTd class="px-3 py-2.5 text-right">
+                    <div class="flex justify-end gap-2">
+                      <button (click)="abrirEditarAcabado(a)" class="text-xs text-neutral-600 hover:text-black font-semibold cursor-pointer">Editar</button>
+                      <button (click)="eliminarAcabado(a.id)" class="text-xs text-[var(--color-accent)] font-semibold hover:underline cursor-pointer">Eliminar</button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="3" class="p-4 text-center text-xs text-neutral-400 font-medium">No hay acabados registrados.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
         </div>
       </div>
 
     </div>
   </main>
 </div>
+
+<!-- Modal Edición Material -->
+@if (materialEditando()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
+    <div class="w-full max-w-md bg-white border-2 border-neutral-300 p-6 rounded-sm shadow-2xl crop-marks relative animate-fade-in-up">
+      <div class="flex justify-between items-center mb-4 pb-2 border-b border-neutral-200">
+        <div>
+          <h3 class="text-lg font-bold text-[var(--color-ink)] uppercase">Editar Material</h3>
+          <p class="text-xs text-neutral-500">Modifique los datos del material seleccionado.</p>
+        </div>
+        <button (click)="materialEditando.set(null)" class="text-neutral-400 hover:text-black font-bold text-lg cursor-pointer">✕</button>
+      </div>
+
+      <form [formGroup]="formEditMaterial" (ngSubmit)="guardarEditMaterial()" class="flex flex-col gap-4 py-2">
+        <div class="flex flex-col gap-1.5">
+          <label hlmLabel for="editNombreMat" class="font-medium text-neutral-700">Nombre</label>
+          <input hlmInput id="editNombreMat" formControlName="nombre" class="w-full border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-800 rounded-sm focus:border-neutral-900 outline-none" />
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label hlmLabel for="editDescMat" class="font-medium text-neutral-700">Descripción</label>
+          <input hlmInput id="editDescMat" formControlName="descripcion" class="w-full border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-800 rounded-sm focus:border-neutral-900 outline-none" />
+        </div>
+
+        <div class="flex gap-3">
+          <div class="w-1/2 flex flex-col gap-1.5">
+            <label hlmLabel for="editCostoCm2" class="font-medium text-neutral-700">Costo / cm² (S/)</label>
+            <input hlmInput id="editCostoCm2" type="number" step="0.0001" formControlName="costoCm2" class="font-ticket w-full border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-800 rounded-sm focus:border-neutral-900 outline-none" />
+          </div>
+          <div class="w-1/2 flex flex-col gap-1.5">
+            <label hlmLabel for="editStockMin" class="font-medium text-neutral-700">Stock Mínimo</label>
+            <input hlmInput id="editStockMin" type="number" formControlName="stockMinimo" class="font-ticket w-full border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-800 rounded-sm focus:border-neutral-900 outline-none" />
+          </div>
+        </div>
+
+        <div class="mt-4 flex justify-end gap-2 pt-2 border-t border-neutral-100">
+          <button hlmBtn type="button" variant="outline" (click)="materialEditando.set(null)" class="cursor-pointer">Cancelar</button>
+          <button hlmBtn type="submit" [disabled]="formEditMaterial.invalid || guardandoMaterial()" class="cursor-pointer">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Modal Edición Acabado -->
+@if (acabadoEditando()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
+    <div class="w-full max-w-md bg-white border-2 border-neutral-300 p-6 rounded-sm shadow-2xl crop-marks relative animate-fade-in-up">
+      <div class="flex justify-between items-center mb-4 pb-2 border-b border-neutral-200">
+        <div>
+          <h3 class="text-lg font-bold text-[var(--color-ink)] uppercase">Editar Acabado</h3>
+          <p class="text-xs text-neutral-500">Modifique la técnica de acabado seleccionada.</p>
+        </div>
+        <button (click)="acabadoEditando.set(null)" class="text-neutral-400 hover:text-black font-bold text-lg cursor-pointer">✕</button>
+      </div>
+
+      <form [formGroup]="formEditAcabado" (ngSubmit)="guardarEditAcabado()" class="flex flex-col gap-4 py-2">
+        <div class="flex flex-col gap-1.5">
+          <label hlmLabel for="editNombreAcab" class="font-medium text-neutral-700">Nombre</label>
+          <input hlmInput id="editNombreAcab" formControlName="nombre" class="w-full border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-800 rounded-sm focus:border-neutral-900 outline-none" />
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label hlmLabel for="editDescAcab" class="font-medium text-neutral-700">Descripción</label>
+          <input hlmInput id="editDescAcab" formControlName="descripcion" class="w-full border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-800 rounded-sm focus:border-neutral-900 outline-none" />
+        </div>
+
+        <div class="flex gap-3">
+          <div class="w-1/2 flex flex-col gap-1.5">
+            <label hlmLabel for="editPrecioBase" class="font-medium text-neutral-700">Precio Base (S/)</label>
+            <input hlmInput id="editPrecioBase" type="number" step="0.01" formControlName="precioBase" class="font-ticket w-full border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-800 rounded-sm focus:border-neutral-900 outline-none" />
+          </div>
+          <div class="w-1/2 flex flex-col gap-1.5">
+            <label hlmLabel for="editUnidadMed" class="font-medium text-neutral-700">Unidad Medida</label>
+            <input hlmInput id="editUnidadMed" formControlName="unidadMedida" class="w-full border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-800 rounded-sm focus:border-neutral-900 outline-none" />
+          </div>
+        </div>
+
+        <div class="mt-4 flex justify-end gap-2 pt-2 border-t border-neutral-100">
+          <button hlmBtn type="button" variant="outline" (click)="acabadoEditando.set(null)" class="cursor-pointer">Cancelar</button>
+          <button hlmBtn type="submit" [disabled]="formEditAcabado.invalid || guardandoAcabado()" class="cursor-pointer">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
