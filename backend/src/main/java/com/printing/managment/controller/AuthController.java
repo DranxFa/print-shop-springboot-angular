@@ -2,9 +2,11 @@ package com.printing.managment.controller;
 
 import com.printing.managment.dto.LoginRequest;
 import com.printing.managment.dto.LoginResponse;
+import com.printing.managment.exception.ResourceNotFoundException;
 import com.printing.managment.model.Usuario;
 import com.printing.managment.repository.UsuarioRepository;
 import com.printing.managment.security.JwtService;
+import jakarta.validation.Valid;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,14 +31,14 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public LoginResponse login(@RequestBody LoginRequest request) {
+    public LoginResponse login(@Valid @RequestBody LoginRequest request) {
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.email(), request.password())
         );
 
         Usuario usuario = usuarioRepository.findByEmail(request.email())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con email: " + request.email()));
 
         String token = jwtService.generarToken(usuario.getEmail());
 

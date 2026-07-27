@@ -3,6 +3,7 @@ package com.printing.managment.controller;
 import com.printing.managment.dto.CotizacionRequest;
 import com.printing.managment.dto.CotizacionResponse;
 import com.printing.managment.service.CotizacionService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +18,7 @@ public class CotizacionController {
     }
 
     @PostMapping
-    public ResponseEntity<CotizacionResponse> cotizar(@RequestBody CotizacionRequest request){
+    public ResponseEntity<CotizacionResponse> cotizar(@Valid @RequestBody CotizacionRequest request) {
         CotizacionResponse response = cotizacionService.cotizar(request);
         return ResponseEntity.ok(response);
     }

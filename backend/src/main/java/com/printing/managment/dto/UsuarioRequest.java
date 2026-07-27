@@ -1,11 +1,21 @@
 package com.printing.managment.dto;
 
 import com.printing.managment.model.Rol;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record UsuarioRequest(
+        @NotBlank(message = "El nombre es obligatorio")
         String nombre,
+
+        @NotBlank(message = "El email es obligatorio")
+        @Email(message = "El formato de email no es válido")
         String email,
+
+        @NotBlank(message = "La contraseña es obligatoria")
         String password,
+
+        @NotNull(message = "El rol es obligatorio")
         Rol rol
-) {
-}
+) {}

@@ -2,11 +2,14 @@ package com.printing.managment.service;
 
 import com.printing.managment.dto.PagoRequest;
 import com.printing.managment.dto.PagoResponse;
+import com.printing.managment.exception.BadRequestException;
+import com.printing.managment.exception.ResourceNotFoundException;
 import com.printing.managment.model.Pago;
 import com.printing.managment.model.Pedido;
 import com.printing.managment.repository.PagoRepository;
 import com.printing.managment.repository.PedidoRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -24,15 +27,16 @@ public class PagoService {
         this.pedidoRepository = pedidoRepository;
     }
 
+    @Transactional
     public PagoResponse registrarPago(Long idPedido, PagoRequest request) {
         Pedido pedido = pedidoRepository.findById(idPedido)
-                .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado con ID: " + idPedido));
 
         BigDecimal totalPagado = calcularTotalPagado(pedido);
         BigDecimal saldoPendiente = pedido.getTotal().subtract(totalPagado);
 
         if (request.monto().compareTo(saldoPendiente) > 0) {
-            throw new IllegalArgumentException(
+            throw new BadRequestException(
                     "El monto excede el saldo pendiente (S/ " + saldoPendiente + ")");
         }
 
@@ -49,9 +53,10 @@ public class PagoService {
                 pagoGuardado.getMetodo(), pagoGuardado.getFecha(), nuevoSaldo);
     }
 
+    @Transactional(readOnly = true)
     public List<PagoResponse> listarPagos(Long idPedido) {
         Pedido pedido = pedidoRepository.findById(idPedido)
-                .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado con ID: " + idPedido));
 
         List<Pago> pagosOrdenados = pedido.getPagos().stream()
                 .sorted(Comparator.comparing(Pago::getFecha))

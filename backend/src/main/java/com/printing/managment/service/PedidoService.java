@@ -1,6 +1,8 @@
 package com.printing.managment.service;
 
 import com.printing.managment.dto.*;
+import com.printing.managment.exception.BadRequestException;
+import com.printing.managment.exception.ResourceNotFoundException;
 import com.printing.managment.model.*;
 import com.printing.managment.repository.AcabadoRepository;
 import com.printing.managment.repository.ClienteRepository;
@@ -9,6 +11,7 @@ import com.printing.managment.repository.PedidoRepository;
 import com.printing.managment.security.CustomUserDetails;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -33,33 +36,69 @@ public class PedidoService {
         this.cotizacionService = cotizacionService;
     }
 
-    public PedidoResponse crearPedido(PedidoRequest request){
-        Cliente cliente = clienteRepository.findById(request.idCliente())
-                .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+    @Transactional(readOnly = true)
+    public List<PedidoResponse> obtenerTodos() {
+        return pedidoRepository.findAll().stream()
+                .map(this::convertirAPedidoResponse)
+                .toList();
+    }
 
+    @Transactional(readOnly = true)
+    public PedidoResponse obtenerPorId(Long id) {
+        Pedido pedido = pedidoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado con ID: " + id));
+        return convertirAPedidoResponse(pedido);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PedidoResponse> obtenerPorEstado(EstadoPedido estado) {
+        if (estado == null) {
+            throw new BadRequestException("El estado especificado no puede ser nulo");
+        }
+        return pedidoRepository.findByEstadoActual(estado).stream()
+                .map(this::convertirAPedidoResponse)
+                .toList();
+    }
+
+    @Transactional
+    public PedidoResponse crearPedido(PedidoRequest request) {
+        Cliente cliente = clienteRepository.findById(request.idCliente())
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado con ID: " + request.idCliente()));
 
         Pedido pedido = new Pedido();
         Usuario usuarioActual = obtenerUsuarioAutenticado();
 
         pedido.setCliente(cliente);
 
-        List<ItemPedido> itemsPedido = request.items().stream().map( i -> crearItem(pedido,i)).toList();
+        List<ItemPedido> itemsPedido = request.items().stream().map(i -> crearItem(pedido, i)).toList();
         pedido.setItems(itemsPedido);
         pedido.setUsuario(usuarioActual);
         pedido.setTotal(itemsPedido.stream().map(ItemPedido::getPrecioCalculado)
                 .reduce(BigDecimal.ZERO, BigDecimal::add));
         Pedido pedidoGuardado = pedidoRepository.save(pedido);
 
-        List<ItemPedidoResponse> itemsResponse =itemsPedido.stream().map(this::convertirAItemResponse).toList();
+        List<ItemPedidoResponse> itemsResponse = itemsPedido.stream().map(this::convertirAItemResponse).toList();
 
-        return new PedidoResponse(pedidoGuardado.getId(),pedidoGuardado.getCliente().getId(),
-                itemsResponse,pedidoGuardado.getEstadoActual(),pedidoGuardado.getTotal());
+        return new PedidoResponse(pedidoGuardado.getId(), pedidoGuardado.getCliente().getId(),
+                itemsResponse, pedidoGuardado.getEstadoActual(), pedidoGuardado.getTotal());
     }
 
-
+    @Transactional
     public PedidoResponse cambiarEstado(Long idPedido, EstadoPedido nuevoEstado) {
+        if (nuevoEstado == null) {
+            throw new BadRequestException("El nuevo estado no puede ser nulo");
+        }
+
         Pedido pedido = pedidoRepository.findById(idPedido)
-                .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado con ID: " + idPedido));
+
+        if (pedido.getEstadoActual() == nuevoEstado) {
+            throw new BadRequestException("El pedido ya se encuentra en el estado: " + nuevoEstado);
+        }
+
+        if (pedido.getEstadoActual() == EstadoPedido.ENTREGADO) {
+            throw new BadRequestException("No se puede cambiar el estado de un pedido que ya está ENTREGADO");
+        }
 
         Usuario usuarioActual = obtenerUsuarioAutenticado();
 
@@ -81,33 +120,43 @@ public class PedidoService {
                 itemsResponse, pedidoActualizado.getEstadoActual(), pedidoActualizado.getTotal());
     }
 
-    private ItemPedido crearItem(Pedido pedido, ItemPedidoRequest itemRequest){
+    private ItemPedido crearItem(Pedido pedido, ItemPedidoRequest itemRequest) {
+        Material material = materialRepository.findById(itemRequest.idMaterial())
+                .orElseThrow(() -> new ResourceNotFoundException("Material no encontrado con ID: " + itemRequest.idMaterial()));
 
-            Material material = materialRepository.findById(itemRequest.idMaterial())
-                    .orElseThrow(() -> new RuntimeException("Material no encontrado"));
+        Acabado acabado = itemRequest.idAcabado() != null ?
+                acabadoRepository.findById(itemRequest.idAcabado())
+                        .orElseThrow(() -> new ResourceNotFoundException("Acabado no encontrado con ID: " + itemRequest.idAcabado()))
+                : null;
 
-            Acabado acabado = itemRequest.idAcabado() != null?
-                    acabadoRepository.findById(itemRequest.idAcabado()).orElse(null)
-                    : null;
+        ItemPedido item = new ItemPedido();
+        item.setPedido(pedido);
+        item.setMaterial(material);
+        item.setAcabado(acabado);
+        item.setAltoCm(itemRequest.alto());
+        item.setAnchoCm(itemRequest.ancho());
+        item.setCantidad(itemRequest.cantidad());
+        CotizacionResponse cotizacionResponse = cotizacionService.calcularPrecio(
+                material, acabado, item.getAltoCm(), item.getAnchoCm(), item.getCantidad());
+        item.setPrecioCalculado(cotizacionResponse.total());
 
-            ItemPedido item = new ItemPedido();
-            item.setPedido(pedido);
-            item.setMaterial(material);
-            item.setAcabado(acabado);
-            item.setAltoCm(itemRequest.alto());
-            item.setAnchoCm(itemRequest.ancho());
-            item.setCantidad(itemRequest.cantidad());
-            CotizacionResponse cotizacionResponse = cotizacionService.calcularPrecio
-                    (material,acabado,item.getAltoCm(),item.getAnchoCm(),item.getCantidad());
-            item.setPrecioCalculado(cotizacionResponse.total());
-
-            return item;
+        return item;
     }
 
-    private ItemPedidoResponse convertirAItemResponse(ItemPedido itemPedido){
+    private PedidoResponse convertirAPedidoResponse(Pedido pedido) {
+        return new PedidoResponse(
+                pedido.getId(),
+                pedido.getCliente().getId(),
+                pedido.getItems().stream().map(this::convertirAItemResponse).toList(),
+                pedido.getEstadoActual(),
+                pedido.getTotal()
+        );
+    }
+
+    private ItemPedidoResponse convertirAItemResponse(ItemPedido itemPedido) {
         return new ItemPedidoResponse(
                 itemPedido.getMaterial().getNombre(),
-                itemPedido.getAcabado() !=  null? itemPedido.getAcabado().getNombre(): "Sin acabado",
+                itemPedido.getAcabado() != null ? itemPedido.getAcabado().getNombre() : "Sin acabado",
                 itemPedido.getAnchoCm(),
                 itemPedido.getAltoCm(),
                 itemPedido.getPrecioCalculado()
